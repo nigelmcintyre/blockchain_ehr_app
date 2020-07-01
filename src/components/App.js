@@ -23,14 +23,15 @@ class App extends Component {
     handleInputChange = (event) => {
         event.preventDefault();
 
-        // this.setState({
-        //     [event.target.name]: event.target.value,
-        // });
+        this.setState({
+            [event.target.name]: event.target.value,
+        });
     };
     // https://ipfs.infura.io/ipfs/QmWRyEzzHEf4sRbUniSsoRKo59n25peXta8pSGYZrFqbu7
     onSubmit = async (event) => {
         event.preventDefault();
         let file = '';
+        let patientData = '';
         console.log('submitting file to IPFS');
         const data = JSON.stringify({
             patientName: this.state.patientName,
@@ -38,13 +39,15 @@ class App extends Component {
             password: this.state.password,
         });
         for await (file of ipfs.add(data)) {
-            const patientHash = file.path;
-            console.log(patientHash);
+            patientData = file.path;
+            console.log('Patient uploaded to IPFS');
+            console.log(patientData);
         }
-
+        console.log(patientData);
         const patient = await fetch(
-            `https://ipfs.infura.io/ipfs/QmQtMtwBRkWmcD1CxHEhWGiByqr6LZkQJB1ZSUJS1mLLpy`,
+            `https://ipfs.infura.io/ipfs/${patientData}`,
         ).then((res) => res.json());
+        await console.log(patient);
         this.setState({
             patientName: patient.patientName,
             patientEmail: patient.patientEmail,
