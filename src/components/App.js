@@ -17,6 +17,7 @@ class App extends Component {
             patientName: '',
             patientEmail: '',
             password: '',
+            displayName: '',
         };
     }
 
@@ -49,7 +50,7 @@ class App extends Component {
         ).then((res) => res.json());
         await console.log(patient);
         this.setState({
-            patientName: patient.patientName,
+            displayName: patient.patientName,
             patientEmail: patient.patientEmail,
         });
     };
@@ -118,7 +119,7 @@ class App extends Component {
                                         Submit
                                     </Button>
                                 </Form>
-                                <p>Patient {this.state.patientName} added</p>
+                                <p>Patient {this.state.displayName} added</p>
                             </div>
                         </main>
                     </div>
