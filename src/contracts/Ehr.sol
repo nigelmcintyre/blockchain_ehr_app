@@ -57,7 +57,7 @@ contract Ehr is AccessControl{
         string calldata _name,
         string calldata _email,
         string calldata _password,
-        string calldata _patientHash) external onlyDoctor {
+        string calldata _patientHash) external {
         patients[_address] = PatientDetails(_address,
                                             _name,
                                             _email,
@@ -69,7 +69,7 @@ contract Ehr is AccessControl{
         address _address,
         string calldata _name,
         string calldata _email,
-        string calldata _password) external onlyAdmin {
+        string calldata _password) external {
             doctors[_address] = DoctorDetails(_address,
                                             _name,
                                             _email,
@@ -79,15 +79,14 @@ contract Ehr is AccessControl{
     
 
     function getPatient(address _address) public view returns (address, string memory, string memory, string memory, string memory){
-        if(hasRole(DOCTOR_ROLE, msg.sender) || msg.sender == _address ){
-            return (patients[_address].addr,
-                    patients[_address].name,
-                    patients[_address].email,
-                    patients[_address].password,
-                    patients[_address].patientHash);
-        }
-        revert('Cannot read patient details'); 
-        
+      if(patients[_address].addr == _address){
+        return (patients[_address].addr,
+                patients[_address].name,
+                patients[_address].email,
+                patients[_address].password,
+                patients[_address].patientHash);
+       } 
+      revert('Patient does not exist');
     }
 
     function getDoctor(address _address) public view returns (address, string memory, string memory, string memory){
@@ -96,5 +95,24 @@ contract Ehr is AccessControl{
                 doctors[_address].email,
                 doctors[_address].password);
     }
+
+    function updatPatient(address _address, 
+                          string memory _name,
+                          string memory _email,
+                          string memory _password) public {
+      patients[_address].name = _name;
+      patients[_address].email = _email;
+      patients[_address].password = _password;
+    }
+
+    function destroyPatient(address _address) public {
+      if(patients[_address].addr == _address){
+        delete patients[_address];
+      }
+      revert('Patient does not exist');
+      
+    }
+
+
 
 }

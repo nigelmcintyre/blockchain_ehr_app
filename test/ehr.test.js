@@ -35,7 +35,7 @@ contract('Ehr', (accounts) => {
     // });
 
     describe('new doctor', async () => {
-        it('adds new doctor', async () => {
+        it('should add new doctor', async () => {
             await ehr.newDoctor(admin, 'Doc', 'doc@email', 'docword');
             const result = await ehr.getDoctor(admin);
             assert.equal(result[0], admin);
@@ -46,7 +46,7 @@ contract('Ehr', (accounts) => {
     });
 
     describe('new patient', async () => {
-        it('adds new patient', async () => {
+        it('should add new patient', async () => {
             await ehr.newPatient(
                 accounts[2],
                 'Nigel',
@@ -61,6 +61,51 @@ contract('Ehr', (accounts) => {
             assert.equal(result[2], 'email');
             assert.equal(result[3], 'password');
             assert.equal(result[4], 'hash');
+        });
+    });
+
+    describe('update patient', async () => {
+        it('should update patient', async () => {
+            await ehr.updatPatient(accounts[2], 'Frank', 'frankMail', 'pass');
+            const result = await ehr.getPatient(accounts[2]);
+            assert.equal(result[0], accounts[2]);
+            assert.equal(result[1], 'Frank');
+            assert.equal(result[2], 'frankMail');
+            assert.equal(result[3], 'pass');
+        });
+    });
+    describe('get a non-existing patient', async () => {
+        it('should throw error when trying to read non-existing patient', async () => {
+            try {
+                await ehr.getPatient(accounts[3]);
+            } catch (e) {
+                assert(e.message.includes('Patient does not exist'));
+                return;
+            }
+            assert(false);
+        });
+    });
+    describe('destroy patient', async () => {
+        it('should destroy patient', async () => {
+            await ehr.destroyPatient(accounts[2]);
+            try {
+                await ehr.getPatient(accounts[2]);
+            } catch (e) {
+                assert(e.message.includes('Patient does not exist'));
+                return;
+            }
+            assert(false);
+        });
+    });
+
+    describe('not destroy patient', async () => {
+        it('Should not destroy a non-existing patient', async () => {
+            try {
+                await ehr.destroyPatient(accounts[2]);
+            } catch (e) {
+                assert(e.message.includes('Patient does not exist'));
+                return;
+            }
         });
     });
 });

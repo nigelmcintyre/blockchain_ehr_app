@@ -15,6 +15,7 @@ class AddPatient extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            patientAddress: '',
             patientName: '',
             patientEmail: '',
             password: '',
@@ -36,30 +37,27 @@ class AddPatient extends Component {
         }
     }
     // Extract function to it's onw file
-    async loadBlockchainData() {
+    async addPatientBlockchain(account, name, email, password, hash) {
         const web3 = window.web3;
-        // Load account
-        const accounts = await web3.eth.getAccounts();
-        this.setState({ account: accounts[0] });
+        this.setState({ account: account });
         const networkId = await web3.eth.net.getId();
         const networkData = Ehr.networks[networkId];
         if (networkData) {
             const contract = web3.eth.Contract(Ehr.abi, networkData.address);
             this.setState({ contract });
-            //const patientDetails = await contract.methods.getPatient().call();
+            console.log(contract);
+            await contract.methods
+                .newPatient(account, name, email, password, hash)
+                .call();
 
-            // this.setState({
-            //     patientName: patientDetails[1],
-            //     patientEmail: patientDetails[2],
-            //     patientPassword: patientDetails[3],
-            //     patientHash: patientDetails[4],
-            // });
+            const patientDetails = await contract.methods
+                .getPatient(account)
+                .call();
+            console.log(patientDetails);
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
     }
-
-    async;
 
     handleInputChange = (event) => {
         event.preventDefault();
@@ -72,27 +70,45 @@ class AddPatient extends Component {
     onSubmit = async (event) => {
         event.preventDefault();
         let file = '';
-        let patientData = '';
+        let patientHash = '';
+        let patientResult = '';
         console.log('submitting file to IPFS');
         const data = JSON.stringify({
+            patientAddress: this.state.patientAddress,
             patientName: this.state.patientName,
             patientEmail: this.state.patientEmail,
             password: this.state.password,
         });
         for await (file of ipfs.add(data)) {
-            patientData = file.path;
+            patientHash = file.path;
             console.log('Patient uploaded to IPFS');
-            console.log(patientData);
         }
-        console.log(patientData);
-        const patient = await fetch(
-            `https://ipfs.infura.io/ipfs/${patientData}`,
-        ).then((res) => res.json());
-        await console.log(patient);
-        this.setState({
-            displayName: patient.patientName,
-            patientEmail: patient.patientEmail,
-        });
+        const result = await fetch(
+            `https://ipfs.infura.io/ipfs/${patientHash}`,
+        );
+
+        // patientResult = this.addPatientBlockchain(
+        //     data.patientAddress,
+        //     data.patientName,
+        //     data.patientEmail,
+        //     data.password,
+        //     patientHash,
+        // );
+        const patient = await result.json();
+        console.log(patient);
+        const addedPatient = await this.addPatientBlockchain(
+            patient.patientAddress,
+            patient.patientName,
+            patient.patientEmail,
+            patient.password,
+            patientHash,
+        );
+        console.log(addedPatient);
+
+        // this.setState({
+        //     displayName: patient.patientName,
+        //     patientEmail: patient.patientEmail,
+        // });
     };
 
     componentDidMount = async () => {};
@@ -103,6 +119,23 @@ class AddPatient extends Component {
                     <main role="main" className="col-lg-12 d-flex text-center">
                         <div className="content mr-auto ml-auto">
                             <Form onSubmit={this.onSubmit}>
+                                <Form.Group
+                                    controlId="patientAddwait this.setState({
+        //     displayName: patient.patientName,
+        //     patientEmail: patient.patientEmail,
+        // });ress"
+                                >
+                                    <Form.Label>
+                                        Patient Account Address
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="patientAddress"
+                                        //value={patientName}
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patient's address"
+                                    />
+                                </Form.Group>
                                 <Form.Group controlId="patientName">
                                     <Form.Label>Patient Name</Form.Label>
                                     <Form.Control
