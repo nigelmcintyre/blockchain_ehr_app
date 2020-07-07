@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Nav, Navbar } from 'react-bootstrap';
 
 import styled from 'styled-components';
@@ -19,11 +20,11 @@ const Styles = styled.div`
 
 export const NavigationBar = () => (
     <Styles>
-        <Navbar bg="dark" expand="lg">
+        <Navbar expand="lg">
             <Navbar.Brand href="/">EHR app</Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="mr-auto">
+                <Nav className="mr-auto float-right">
                     <Nav.Item>
                         <Nav.Link href="/">Home</Nav.Link>
                     </Nav.Item>

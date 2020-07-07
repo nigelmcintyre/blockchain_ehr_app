@@ -6,6 +6,7 @@ import AddPatient from './AddPatient';
 import Home from './Home';
 import { Layout } from './Layout';
 import { NavigationBar } from './NavigationBar';
+import AddDoctor from './AddDoctor';
 
 class App extends Component {
     render() {
@@ -17,6 +18,7 @@ class App extends Component {
                         <Switch>
                             <Route exact path="/" component={Home} />
                             <Route path="/addPatient" component={AddPatient} />
+                            <Route path="/addDoctor" component={AddDoctor} />
                         </Switch>
                     </Router>
                 </Layout>

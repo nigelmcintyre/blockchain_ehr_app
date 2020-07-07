@@ -3,7 +3,6 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Nav from 'react-bootstrap/Nav';
 import Web3 from 'web3';
-import { NavigationBar } from './NavigationBar';
 import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 
@@ -37,23 +36,35 @@ class AddPatient extends Component {
         }
     }
     // Extract function to it's onw file
-    async addPatientBlockchain(account, name, email, password, hash) {
+    async addPatientToBlockchain(account, name, email, password, hash) {
+        // Setting up connection to blockchain
         const web3 = window.web3;
         this.setState({ account: account });
         const networkId = await web3.eth.net.getId();
         const networkData = Ehr.networks[networkId];
+        let accounts = [];
+        await web3.eth.getAccounts().then((_accounts) => {
+            accounts = _accounts;
+        });
+
+        // If blockchin connection is successful
         if (networkData) {
+            // Connect to smart contract
             const contract = web3.eth.Contract(Ehr.abi, networkData.address);
             this.setState({ contract });
-            console.log(contract);
-            await contract.methods
-                .newPatient(account, name, email, password, hash)
-                .call();
 
             const patientDetails = await contract.methods
                 .getPatient(account)
                 .call();
-            console.log(patientDetails);
+            if (patientDetails[0].includes('0x00000000000000000')) {
+                const newPatient = await contract.methods
+                    .newPatient(account, name, email, password, hash)
+                    .send({ from: accounts[0] });
+                console.log('Patient added to the blockchain');
+                this.setState({ displayName: name });
+            } else {
+                this.setState({ displayName: 'already' });
+            }
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
@@ -79,36 +90,24 @@ class AddPatient extends Component {
             patientEmail: this.state.patientEmail,
             password: this.state.password,
         });
+
         for await (file of ipfs.add(data)) {
             patientHash = file.path;
             console.log('Patient uploaded to IPFS');
         }
+
         const result = await fetch(
             `https://ipfs.infura.io/ipfs/${patientHash}`,
         );
 
-        // patientResult = this.addPatientBlockchain(
-        //     data.patientAddress,
-        //     data.patientName,
-        //     data.patientEmail,
-        //     data.password,
-        //     patientHash,
-        // );
         const patient = await result.json();
-        console.log(patient);
-        const addedPatient = await this.addPatientBlockchain(
+        const addedPatient = await this.addPatientToBlockchain(
             patient.patientAddress,
             patient.patientName,
             patient.patientEmail,
             patient.password,
             patientHash,
         );
-        console.log(addedPatient);
-
-        // this.setState({
-        //     displayName: patient.patientName,
-        //     patientEmail: patient.patientEmail,
-        // });
     };
 
     componentDidMount = async () => {};
@@ -119,12 +118,7 @@ class AddPatient extends Component {
                     <main role="main" className="col-lg-12 d-flex text-center">
                         <div className="content mr-auto ml-auto">
                             <Form onSubmit={this.onSubmit}>
-                                <Form.Group
-                                    controlId="patientAddwait this.setState({
-        //     displayName: patient.patientName,
-        //     patientEmail: patient.patientEmail,
-        // });ress"
-                                >
+                                <Form.Group controlId="patientAddress">
                                     <Form.Label>
                                         Patient Account Address
                                     </Form.Label>
