@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Nav from 'react-bootstrap/Nav';
 import Web3 from 'web3';
 import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
+import LoadWeb3 from '../loadWeb3';
 
 class AddDoctor extends Component {
     async componentWillMount() {
-        await this.loadWeb3();
+        await LoadWeb3();
         //await this.loadBlockchainData();
     }
     constructor(props) {
@@ -25,16 +25,7 @@ class AddDoctor extends Component {
         };
     }
     // Extract function to it's own file
-    async loadWeb3() {
-        if (window.ethereum) {
-            window.web3 = new Web3(window.ethereum);
-            await window.ethereum.enable();
-        } else if (window.web3) {
-            window.web3 = new Web3(window.web3.currentProvider);
-        } else {
-            window.alert('Please use metamask');
-        }
-    }
+
     // Extract function to it's onw file
     async addDoctorToBlockchain(account, name, email, password) {
         // Setting up connection to blockchain
@@ -60,6 +51,7 @@ class AddDoctor extends Component {
                 const newDoctor = await contract.methods
                     .newDoctor(account, name, email, password)
                     .send({ from: accounts[0] })
+                    // DOESNT WORK??? ---------------------------------------------
                     .then(() => {
                         console.log('Doctor added to the blockchain');
                         this.setState({ displayName: name });
@@ -79,15 +71,10 @@ class AddDoctor extends Component {
             [event.target.name]: event.target.value,
         });
     };
-    // https://ipfs.infura.io/ipfs/QmWRyEzzHEf4sRbUniSsoRKo59n25peXta8pSGYZrFqbu7
     onSubmit = async (event) => {
         event.preventDefault();
-        let file = '';
-        let doctorHash = '';
-        let doctorResult = '';
 
         // console.log('submitting file to IPFS');
-        const data = JSON.stringify({});
 
         // for await (file of ipfs.add(data)) {
         //     doctorHash = file.path;

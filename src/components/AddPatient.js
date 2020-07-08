@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Nav from 'react-bootstrap/Nav';
-import Web3 from 'web3';
 import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
+import LoadWeb3 from '../loadWeb3';
 
 class AddPatient extends Component {
     async componentWillMount() {
-        await this.loadWeb3();
+        await LoadWeb3();
         //await this.loadBlockchainData();
     }
     constructor(props) {
@@ -25,16 +24,16 @@ class AddPatient extends Component {
         };
     }
     // Extract function to it's own file
-    async loadWeb3() {
-        if (window.ethereum) {
-            window.web3 = new Web3(window.ethereum);
-            await window.ethereum.enable();
-        } else if (window.web3) {
-            window.web3 = new Web3(window.web3.currentProvider);
-        } else {
-            window.alert('Please use metamask');
-        }
-    }
+    // async loadWeb3() {
+    //     if (window.ethereum) {
+    //         window.web3 = new Web3(window.ethereum);
+    //         await window.ethereum.enable();
+    //     } else if (window.web3) {
+    //         window.web3 = new Web3(window.web3.currentProvider);
+    //     } else {
+    //         window.alert('Please use metamask');
+    //     }
+    // }
     // Extract function to it's onw file
     async addPatientToBlockchain(account, name, email, password, hash) {
         // Setting up connection to blockchain
