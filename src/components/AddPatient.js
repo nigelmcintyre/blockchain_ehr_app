@@ -8,7 +8,7 @@ import LoadWeb3 from '../loadWeb3';
 class AddPatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
-        //await this.loadBlockchainData();
+        await this.loadBlockchainData();
     }
     constructor(props) {
         super(props);
@@ -18,52 +18,49 @@ class AddPatient extends Component {
             patientEmail: '',
             password: '',
             displayName: '',
-            account: null,
+
+            accounts: [],
             contract: null,
             web3: null,
+            networkData: null,
         };
     }
-    // Extract function to it's own file
-    // async loadWeb3() {
-    //     if (window.ethereum) {
-    //         window.web3 = new Web3(window.ethereum);
-    //         await window.ethereum.enable();
-    //     } else if (window.web3) {
-    //         window.web3 = new Web3(window.web3.currentProvider);
-    //     } else {
-    //         window.alert('Please use metamask');
-    //     }
-    // }
-    // Extract function to it's onw file
-    async addPatientToBlockchain(account, name, email, password, hash) {
+    async loadBlockchainData() {
         // Setting up connection to blockchain
         const web3 = window.web3;
-        this.setState({ account: account });
+        this.setState({ web3: web3 });
+
+        // Getting blockchain network ID
         const networkId = await web3.eth.net.getId();
+
+        // Getting the network where the contract is
         const networkData = Ehr.networks[networkId];
-        let accounts = [];
+        this.setState({ networkData: networkData });
+
+        // Getting the account address of the current user
         await web3.eth.getAccounts().then((_accounts) => {
-            accounts = _accounts;
+            this.setState({ accounts: _accounts });
         });
 
+        // Getting the contract instance
+        const contract = this.state.web3.eth.Contract(
+            Ehr.abi,
+            this.state.networkData.address,
+        );
+        this.setState({ contract });
+    }
+    async addPatientToBlockchain(accountAddress, name, email, password, hash) {
         // If blockchin connection is successful
-        if (networkData) {
-            // Connect to smart contract
-            const contract = web3.eth.Contract(Ehr.abi, networkData.address);
-            this.setState({ contract });
-
-            const patientDetails = await contract.methods
-                .getPatient(account)
-                .call();
-            if (patientDetails[0].includes('0x00000000000000000')) {
-                const newPatient = await contract.methods
-                    .newPatient(account, name, email, password, hash)
-                    .send({ from: accounts[0] });
-                console.log('Patient added to the blockchain');
-                this.setState({ displayName: name });
-            } else {
-                this.setState({ displayName: 'already' });
-            }
+        if (this.state.networkData) {
+            // Invoke smart contract addPatient function
+            await this.state.contract.methods
+                .newPatient(accountAddress, name, email, password, hash)
+                .send({ from: this.state.accounts[0] })
+                .on('confirmation', () => {
+                    console.log('Patient added to the blockchain');
+                    //window.location.reload(true);
+                    this.setState({ displayName: `${name}'s record created` });
+                });
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
@@ -81,7 +78,11 @@ class AddPatient extends Component {
         event.preventDefault();
         let file = '';
         let patientHash = '';
-        let patientResult = '';
+
+        const patientDetails = await this.state.contract.methods
+            .getPatient(this.state.patientAddress)
+            .call();
+        //if (patientDetails[0].includes('0x00000000000000000')) {
         console.log('submitting file to IPFS');
         const data = JSON.stringify({
             patientAddress: this.state.patientAddress,
@@ -89,24 +90,24 @@ class AddPatient extends Component {
             patientEmail: this.state.patientEmail,
             password: this.state.password,
         });
-
         for await (file of ipfs.add(data)) {
             patientHash = file.path;
             console.log('Patient uploaded to IPFS');
         }
+        console.log(patientHash);
 
-        const result = await fetch(
-            `https://ipfs.infura.io/ipfs/${patientHash}`,
-        );
-
-        const patient = await result.json();
         const addedPatient = await this.addPatientToBlockchain(
-            patient.patientAddress,
-            patient.patientName,
-            patient.patientEmail,
-            patient.password,
+            this.state.patientAddress,
+            this.state.patientName,
+            this.state.patientEmail,
+            this.state.password,
             patientHash,
         );
+        // } else {
+        //     this.setState({
+        //         displayName: `${this.state.patientName}'s record already exists`,
+        //     });
+        // }
     };
 
     componentDidMount = async () => {};
@@ -162,17 +163,11 @@ class AddPatient extends Component {
                                         placeholder="Password"
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="formBasicCheckbox">
-                                    <Form.Check
-                                        type="checkbox"
-                                        label="Check me out"
-                                    />
-                                </Form.Group>
                                 <Button variant="primary" type="submit">
                                     Submit
                                 </Button>
                             </Form>
-                            <p>Patient {this.state.displayName} added</p>
+                            <p>{this.state.displayName}</p>
                         </div>
                     </main>
                 </div>

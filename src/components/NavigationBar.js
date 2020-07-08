@@ -34,6 +34,9 @@ export const NavigationBar = () => (
                     <Nav.Item>
                         <Nav.Link href="/addDoctor">Add Doctor</Nav.Link>
                     </Nav.Item>
+                    <Nav.Item>
+                        <Nav.Link href="/viewPatient">View Patient</Nav.Link>
+                    </Nav.Item>
                 </Nav>
             </Navbar.Collapse>
         </Navbar>
