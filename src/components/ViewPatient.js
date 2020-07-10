@@ -15,8 +15,11 @@ class ViewPatient extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            patient: '',
             patientAddress: '',
+            patient: '',
+            retrievedAddress: '',
+            patientName: '',
+            patientEmail: '',
 
             accounts: [],
             contract: null,
@@ -37,17 +40,21 @@ class ViewPatient extends Component {
         const networkData = Ehr.networks[networkId];
         this.setState({ networkData: networkData });
 
-        // Getting the account address of the current user
-        await web3.eth.getAccounts().then((_accounts) => {
-            this.setState({ accounts: _accounts });
-        });
+        if (networkData) {
+            // Getting the account address of the current user
+            await web3.eth.getAccounts().then((_accounts) => {
+                this.setState({ accounts: _accounts });
+            });
 
-        // Getting the contract instance
-        const contract = this.state.web3.eth.Contract(
-            Ehr.abi,
-            this.state.networkData.address,
-        );
-        this.setState({ contract });
+            // Getting the contract instance
+            const contract = await web3.eth.Contract(
+                Ehr.abi,
+                this.state.networkData.address,
+            );
+            this.setState({ contract });
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
     }
 
     async getPatientFromBlockchain(accountAddress) {
@@ -56,6 +63,8 @@ class ViewPatient extends Component {
                 .getPatient(accountAddress)
                 .call();
             return patientBlockchainRecord;
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
         }
     }
 
@@ -69,34 +78,35 @@ class ViewPatient extends Component {
 
     onSubmit = async (event) => {
         event.preventDefault();
-        let patientArray = [];
 
-        this.state.patient = await this.getPatientFromBlockchain(
-            this.state.patientAddress,
-        );
+        if (this.state.patientAddress) {
+            this.state.patient = await this.getPatientFromBlockchain(
+                this.state.patientAddress,
+            );
+            this.setState({ patientAddress: '' });
 
-        console.log(this.state.patient[4]);
-        // 0xd1879bfdb41a3573d0e454c41f5d8d39c8ed794a;
-        // QmaNbF1Doyb7WEgeRRYqWi5cYzRN76ZH4a4Gg24fxHCWKW;
-        const result = await fetch(
-            `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
-        );
+            if (!this.state.patient[0].includes('0x00000000000')) {
+                const result = await fetch(
+                    `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
+                ).catch((error) => {
+                    window.alert('Error retrieving patient reccord from IPFS');
+                    console.log(error.message);
+                });
+                const patient = await result.json();
 
-        this.state.patient = await result.json();
-
-        this.renderPatient(this.state.patient);
+                this.setState({
+                    retrievedAddress: patient.patientAddress,
+                    patientName: patient.patientName,
+                    patientEmail: patient.patientEmail,
+                });
+            } else {
+                window.alert('No patient account with that address');
+            }
+        } else {
+            window.alert('Please enter a patient account address');
+        }
     };
 
-    renderPatient(patient) {
-        console.log(patient);
-        return (
-            <tr>
-                <td>{patient.patientAddress}</td>
-                <td>{patient.patientName}</td>
-                <td>{patient.patientEmail}</td>
-            </tr>
-        );
-    }
     render() {
         return (
             <div className="container-fluid mt-5">
@@ -108,13 +118,14 @@ class ViewPatient extends Component {
                             name="patientAddress"
                             onChange={this.handleInputChange}
                             placeholder="Enter patient address"
+                            value={this.state.patientAddress}
                         />
                     </Form.Group>
                     <Button variant="primary" type="submit">
                         Submit
                     </Button>
                 </Form>
-                <Table striped bordered hover>
+                <Table className="my-3 py-md-3" striped bordered hover>
                     <thead>
                         <tr>
                             <th>Address</th>
@@ -122,7 +133,13 @@ class ViewPatient extends Component {
                             <th>Email</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                        <tr>
+                            <td>{this.state.retrievedAddress}</td>
+                            <td>{this.state.patientName}</td>
+                            <td>{this.state.patientEmail}</td>
+                        </tr>
+                    </tbody>
                 </Table>
             </div>
         );

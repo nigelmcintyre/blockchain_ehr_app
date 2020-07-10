@@ -13,6 +13,7 @@ class AddPatient extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            patient: '',
             patientAddress: '',
             patientName: '',
             patientEmail: '',
@@ -36,18 +37,32 @@ class AddPatient extends Component {
         // Getting the network where the contract is
         const networkData = Ehr.networks[networkId];
         this.setState({ networkData: networkData });
+        if (networkData) {
+            // Getting the account address of the current user
+            await web3.eth.getAccounts().then((_accounts) => {
+                this.setState({ accounts: _accounts });
+            });
 
-        // Getting the account address of the current user
-        await web3.eth.getAccounts().then((_accounts) => {
-            this.setState({ accounts: _accounts });
-        });
+            // Getting the contract instance
+            const contract = web3.eth.Contract(
+                Ehr.abi,
+                this.state.networkData.address,
+            );
+            this.setState({ contract });
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
+    }
 
-        // Getting the contract instance
-        const contract = this.state.web3.eth.Contract(
-            Ehr.abi,
-            this.state.networkData.address,
-        );
-        this.setState({ contract });
+    async getPatientFromBlockchain(accountAddress) {
+        if (this.state.networkData) {
+            const patientBlockchainRecord = await this.state.contract.methods
+                .getPatient(accountAddress)
+                .call();
+            return patientBlockchainRecord;
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
     }
     async addPatientToBlockchain(accountAddress, name, email, password, hash) {
         // If blockchin connection is successful
@@ -58,12 +73,23 @@ class AddPatient extends Component {
                 .send({ from: this.state.accounts[0] })
                 .on('confirmation', () => {
                     console.log('Patient added to the blockchain');
-                    //window.location.reload(true);
-                    this.setState({ displayName: `${name}'s record created` });
+                    this.setState({
+                        displayName: `Patient ${this.patientName}'s record successfully created`,
+                    });
+                    this.clearInput();
                 });
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
+    }
+
+    clearInput() {
+        this.setState({
+            patientAddress: '',
+            patientName: '',
+            patientEmail: '',
+            password: '',
+        });
     }
 
     handleInputChange = (event) => {
@@ -78,36 +104,41 @@ class AddPatient extends Component {
         event.preventDefault();
         let file = '';
         let patientHash = '';
+        if (this.state.patientAddress) {
+            this.state.patient = await this.getPatientFromBlockchain(
+                this.state.patientAddress,
+            );
 
-        const patientDetails = await this.state.contract.methods
-            .getPatient(this.state.patientAddress)
-            .call();
-        //if (patientDetails[0].includes('0x00000000000000000')) {
-        console.log('submitting file to IPFS');
-        const data = JSON.stringify({
-            patientAddress: this.state.patientAddress,
-            patientName: this.state.patientName,
-            patientEmail: this.state.patientEmail,
-            password: this.state.password,
-        });
-        for await (file of ipfs.add(data)) {
-            patientHash = file.path;
-            console.log('Patient uploaded to IPFS');
+            if (this.state.patient[0].includes('0x00000000000000000')) {
+                console.log('submitting file to IPFS');
+                const data = JSON.stringify({
+                    patientAddress: this.state.patientAddress,
+                    patientName: this.state.patientName,
+                    patientEmail: this.state.patientEmail,
+                    password: this.state.password,
+                });
+                for await (file of ipfs.add(data)) {
+                    patientHash = file.path;
+                    console.log('Patient uploaded to IPFS');
+                }
+
+                const addedPatient = await this.addPatientToBlockchain(
+                    this.state.patientAddress,
+                    this.state.patientName,
+                    this.state.patientEmail,
+                    this.state.password,
+                    patientHash,
+                );
+            } else {
+                window.alert(
+                    "This address already belongs to a patient's record",
+                );
+                this.clearInput();
+            }
+        } else {
+            window.alert('Please enter patient details');
+            this.clearInput();
         }
-        console.log(patientHash);
-
-        const addedPatient = await this.addPatientToBlockchain(
-            this.state.patientAddress,
-            this.state.patientName,
-            this.state.patientEmail,
-            this.state.password,
-            patientHash,
-        );
-        // } else {
-        //     this.setState({
-        //         displayName: `${this.state.patientName}'s record already exists`,
-        //     });
-        // }
     };
 
     componentDidMount = async () => {};
@@ -128,6 +159,7 @@ class AddPatient extends Component {
                                         //value={patientName}
                                         onChange={this.handleInputChange}
                                         placeholder="Enter patient's address"
+                                        value={this.state.patientAddress}
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="patientName">
@@ -138,6 +170,7 @@ class AddPatient extends Component {
                                         //value={patientName}
                                         onChange={this.handleInputChange}
                                         placeholder="Enter patient's name"
+                                        value={this.state.patientName}
                                     />
                                 </Form.Group>
 
@@ -151,6 +184,7 @@ class AddPatient extends Component {
                                         //value={patientEmail}
                                         onChange={this.handleInputChange}
                                         placeholder="Enter patient's email"
+                                        value={this.state.patientEmail}
                                     />
                                 </Form.Group>
 
@@ -161,6 +195,7 @@ class AddPatient extends Component {
                                         name="password"
                                         onChange={this.handleInputChange}
                                         placeholder="Password"
+                                        value={this.state.password}
                                     />
                                 </Form.Group>
                                 <Button variant="primary" type="submit">

@@ -20,11 +20,10 @@ const Styles = styled.div`
 
 export const NavigationBar = () => (
     <Styles>
-        <Navbar expand="lg">
-            <Navbar.Brand href="/">EHR app</Navbar.Brand>
+        <Navbar expand="lg" variant="dark">
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-                <Nav className="mr-auto float-right">
+            <Navbar.Collapse id="basic-navbar-nav ">
+                <Nav className="mr-auto">
                     <Nav.Item>
                         <Nav.Link href="/">Home</Nav.Link>
                     </Nav.Item>

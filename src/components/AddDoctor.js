@@ -9,7 +9,7 @@ import LoadWeb3 from '../loadWeb3';
 class AddDoctor extends Component {
     async componentWillMount() {
         await LoadWeb3();
-        //await this.loadBlockchainData();
+        await this.loadBlockchainData();
     }
     constructor(props) {
         super(props);
@@ -19,49 +19,74 @@ class AddDoctor extends Component {
             doctorEmail: '',
             password: '',
             displayName: '',
-            account: null,
+
+            accounts: [],
             contract: null,
             web3: null,
+            networkData: null,
         };
     }
-    // Extract function to it's own file
+
+    async loadBlockchainData() {
+        // Setting up connection to blockchain
+        const web3 = window.web3;
+        this.setState({ web3: web3 });
+
+        // Getting blockchain network ID
+        const networkId = await web3.eth.net.getId();
+
+        // Getting the network where the contract is
+        const networkData = Ehr.networks[networkId];
+        this.setState({ networkData: networkData });
+        if (networkData) {
+            // Getting the account address of the current user
+            await web3.eth.getAccounts().then((_accounts) => {
+                this.setState({ accounts: _accounts });
+            });
+
+            // Getting the contract instance
+            const contract = web3.eth.Contract(
+                Ehr.abi,
+                this.state.networkData.address,
+            );
+            this.setState({ contract });
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
+    }
 
     // Extract function to it's onw file
     async addDoctorToBlockchain(account, name, email, password) {
-        // Setting up connection to blockchain
-        const web3 = window.web3;
-        this.setState({ account: account });
-        const networkId = await web3.eth.net.getId();
-        const networkData = Ehr.networks[networkId];
-        let accounts = [];
-        await web3.eth.getAccounts().then((_accounts) => {
-            accounts = _accounts;
-        });
-
-        // If blockchin connection is successful
-        if (networkData) {
-            // Connect to smart contract
-            const contract = web3.eth.Contract(Ehr.abi, networkData.address);
-            this.setState({ contract });
-
-            const doctorDetails = await contract.methods
+        if (this.state.networkData) {
+            const doctorDetails = await this.state.contract.methods
                 .getDoctor(account)
                 .call();
             if (doctorDetails[0].includes('0x00000000000000000')) {
-                const newDoctor = await contract.methods
+                await this.state.contract.methods
                     .newDoctor(account, name, email, password)
-                    .send({ from: accounts[0] })
-                    // DOESNT WORK??? ---------------------------------------------
-                    .then(() => {
+                    .send({ frogetPatientm: this.state.accounts[0] })
+                    .on('confirmation', () => {
                         console.log('Doctor added to the blockchain');
-                        this.setState({ displayName: name });
+                        window.alert(`${name}'s record created`);
                     });
             } else {
-                this.setState({ displayName: 'already' });
+                window.alert(
+                    "This address already belongs to a doctor's accounts",
+                );
+                this.clearInput();
             }
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
+    }
+
+    clearInput() {
+        this.setState({
+            doctorAddress: '',
+            doctorName: '',
+            doctorEmail: '',
+            password: '',
+        });
     }
 
     handleInputChange = (event) => {
@@ -74,23 +99,17 @@ class AddDoctor extends Component {
     onSubmit = async (event) => {
         event.preventDefault();
 
-        // console.log('submitting file to IPFS');
-
-        // for await (file of ipfs.add(data)) {
-        //     doctorHash = file.path;
-        //     console.log('Doctor uploaded to IPFS');
-        // }
-
-        // const result = await fetch(`https://ipfs.infura.io/ipfs/${doctorHash}`);
-
-        // const doctor = await result.json();
-        console.log(this.state.doctorAddress);
-        const addedDoctor = await this.addDoctorToBlockchain(
-            this.state.doctorAddress,
-            this.state.doctorName,
-            this.state.doctorEmail,
-            this.state.password,
-        );
+        if (this.state.doctorAddress) {
+            const addedDoctor = await this.addDoctorToBlockchain(
+                this.state.doctorAddress,
+                this.state.doctorName,
+                this.state.doctorEmail,
+                this.state.password,
+            );
+        } else {
+            window.alert('Please enter doctor details');
+            this.clearInput();
+        }
     };
 
     componentDidMount = async () => {};
@@ -110,6 +129,7 @@ class AddDoctor extends Component {
                                         name="doctorAddress"
                                         onChange={this.handleInputChange}
                                         placeholder="Enter doctor's address"
+                                        value={this.state.doctorAddress}
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="doctorName">
@@ -119,6 +139,7 @@ class AddDoctor extends Component {
                                         name="doctorName"
                                         onChange={this.handleInputChange}
                                         placeholder="Enter doctor's name"
+                                        value={this.state.doctorName}
                                     />
                                 </Form.Group>
 
@@ -131,6 +152,7 @@ class AddDoctor extends Component {
                                         name="doctorEmail"
                                         onChange={this.handleInputChange}
                                         placeholder="Enter doctor's email"
+                                        value={this.state.doctorEmail}
                                     />
                                 </Form.Group>
 
@@ -141,19 +163,15 @@ class AddDoctor extends Component {
                                         name="password"
                                         onChange={this.handleInputChange}
                                         placeholder="Password"
+                                        value={this.state.password}
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="formBasicCheckbox">
-                                    <Form.Check
-                                        type="checkbox"
-                                        label="Check me out"
-                                    />
-                                </Form.Group>
+
                                 <Button variant="primary" type="submit">
                                     Submit
                                 </Button>
                             </Form>
-                            <p>Doctor {this.state.displayName} added</p>
+                            <p>{this.state.displayName}</p>
                         </div>
                     </main>
                 </div>
