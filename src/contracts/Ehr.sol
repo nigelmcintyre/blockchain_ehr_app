@@ -106,11 +106,7 @@ contract Ehr is AccessControl{
     }
 
     function destroyPatient(address _address) public {
-      if(patients[_address].addr == _address){
         delete patients[_address];
-      }
-      revert('Patient does not exist');
-      
     }
 
 

@@ -8,6 +8,7 @@ import { Layout } from './Layout';
 import { NavigationBar } from './NavigationBar';
 import AddDoctor from './AddDoctor';
 import ViewPatient from './ViewPatient';
+import UpdatePatient from './UpdatePatient';
 
 class App extends Component {
     render() {
@@ -23,6 +24,10 @@ class App extends Component {
                             <Route
                                 path="/viewPatient"
                                 component={ViewPatient}
+                            />
+                            <Route
+                                path="/updatePatient"
+                                component={UpdatePatient}
                             />
                         </Switch>
                     </Router>

@@ -94,7 +94,6 @@ contract('Ehr', (accounts) => {
                 assert(e.message.includes('Patient does not exist'));
                 return;
             }
-            assert(false);
         });
     });
 

@@ -5,11 +5,12 @@ import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
 
-class AddPatient extends Component {
+class UpdatePatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
         await this.loadBlockchainData();
     }
+
     constructor(props) {
         super(props);
         this.state = {
@@ -24,7 +25,6 @@ class AddPatient extends Component {
             contract: null,
             web3: null,
             networkData: null,
-            error: '',
         };
     }
     async loadBlockchainData() {
@@ -54,40 +54,16 @@ class AddPatient extends Component {
             window.alert('Smart contract not deployed to detected network.');
         }
     }
-
     async getPatientFromBlockchain(accountAddress) {
         if (this.state.networkData) {
             const patientBlockchainRecord = await this.state.contract.methods
                 .getPatient(accountAddress)
-                .call()
-                .catch((error) => {
-                    console.log(error.data.message);
-                    this.setState({ error: error.data.message });
-                });
+                .call();
             return patientBlockchainRecord;
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
     }
-    async addPatientToBlockchain(accountAddress, name, email, password, hash) {
-        // If blockchin connection is successful
-        if (this.state.networkData) {
-            // Invoke smart contract addPatient function
-            await this.state.contract.methods
-                .newPatient(accountAddress, name, email, password, hash)
-                .send({ from: this.state.accounts[0] })
-                .on('confirmation', () => {
-                    console.log('Patient added to the blockchain');
-                    this.setState({
-                        displayName: `Patient ${this.patientName}'s record successfully created`,
-                    });
-                    this.clearInput();
-                });
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
     clearInput() {
         this.setState({
             patientAddress: '',
@@ -96,7 +72,6 @@ class AddPatient extends Component {
             password: '',
         });
     }
-
     handleInputChange = (event) => {
         event.preventDefault();
 
@@ -104,49 +79,7 @@ class AddPatient extends Component {
             [event.target.name]: event.target.value,
         });
     };
-    // https://ipfs.infura.io/ipfs/QmWRyEzzHEf4sRbUniSsoRKo59n25peXta8pSGYZrFqbu7
-    onSubmit = async (event) => {
-        event.preventDefault();
-        let file = '';
-        let patientHash = '';
-        if (this.state.patientAddress) {
-            this.state.patient = await this.getPatientFromBlockchain(
-                this.state.patientAddress,
-            );
 
-            if (this.state.error.includes('Patient does not exist')) {
-                console.log('submitting file to IPFS');
-                const data = JSON.stringify({
-                    patientAddress: this.state.patientAddress,
-                    patientName: this.state.patientName,
-                    patientEmail: this.state.patientEmail,
-                    password: this.state.password,
-                });
-                for await (file of ipfs.add(data)) {
-                    patientHash = file.path;
-                    console.log('Patient uploaded to IPFS');
-                }
-
-                const addedPatient = await this.addPatientToBlockchain(
-                    this.state.patientAddress,
-                    this.state.patientName,
-                    this.state.patientEmail,
-                    this.state.password,
-                    patientHash,
-                );
-            } else {
-                window.alert(
-                    "This address already belongs to a patient's record",
-                );
-                this.clearInput();
-            }
-        } else {
-            window.alert('Please enter patient details');
-            this.clearInput();
-        }
-    };
-
-    componentDidMount = async () => {};
     render() {
         return (
             <div>
@@ -216,4 +149,4 @@ class AddPatient extends Component {
     }
 }
 
-export default AddPatient;
+export default UpdatePatient;
