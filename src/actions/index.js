@@ -1,3 +1,4 @@
+import store from '../index';
 export const get_address = (address) => {
     return {
         type: 'GET_ADDRESS',

@@ -127,7 +127,7 @@ class AddPatient extends Component {
                     console.log('Patient uploaded to IPFS');
                 }
 
-                const addedPatient = await this.addPatientToBlockchain(
+                await this.addPatientToBlockchain(
                     this.state.patientAddress,
                     this.state.patientName,
                     this.state.patientEmail,

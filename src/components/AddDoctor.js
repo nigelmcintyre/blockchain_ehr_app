@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Web3 from 'web3';
-import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
 
@@ -100,7 +98,7 @@ class AddDoctor extends Component {
         event.preventDefault();
 
         if (this.state.doctorAddress) {
-            const addedDoctor = await this.addDoctorToBlockchain(
+            await this.addDoctorToBlockchain(
                 this.state.doctorAddress,
                 this.state.doctorName,
                 this.state.doctorEmail,

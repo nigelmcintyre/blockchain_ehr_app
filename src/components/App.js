@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import Nav from 'react-bootstrap/Nav';
-import { LinkContainer } from 'react-router-bootstrap';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import AddPatient from './AddPatient';
 import Home from './Home';
 import { Layout } from './Layout';

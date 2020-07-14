@@ -4,11 +4,15 @@ import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
+import { get_address, set_address } from '../actions';
+import { connect } from 'react-redux';
+import store from '../index';
 
 class UpdatePatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
         await this.loadBlockchainData();
+        await this.populateFields();
     }
 
     constructor(props) {
@@ -18,7 +22,6 @@ class UpdatePatient extends Component {
             patientAddress: '',
             patientName: '',
             patientEmail: '',
-            password: '',
             displayName: '',
 
             accounts: [],
@@ -54,16 +57,15 @@ class UpdatePatient extends Component {
             window.alert('Smart contract not deployed to detected network.');
         }
     }
-    async getPatientFromBlockchain(accountAddress) {
-        if (this.state.networkData) {
-            const patientBlockchainRecord = await this.state.contract.methods
-                .getPatient(accountAddress)
-                .call();
-            return patientBlockchainRecord;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
+
+    async populateFields() {
+        const patient = await store.getState();
+        this.setState({
+            patientName: patient.patientAddressReducer.patientName,
+            patientEmail: patient.patientAddressReducer.patientEmail,
+        });
     }
+
     clearInput() {
         this.setState({
             patientAddress: '',
@@ -80,6 +82,28 @@ class UpdatePatient extends Component {
         });
     };
 
+    async onSubmit(event) {
+        // event.preventDefault();
+        // const patient = await store.getState();
+        // console.log(patient.patientAddressReducer.patientName);
+        // console.log(this.state.patientName);
+        // console.log(patient.patientAddressReducer.patientEmail);
+        // console.log(this.state.patientEmail);
+        // console.log(patient.patientAddressReducer.patientAddress);
+        // console.log(patient.patientAddressReducer.patientPassword);
+        // if (
+        //     this.props.patientAddress.patientName != this.state.patientName ||
+        //     this.props.patientAddress.patientEmail != this.state.patientEmail
+        // ) {
+        // await this.state.contract.methods.UpdatePatient(
+        //     this.props.patientAddress.patientAddress,
+        //     this.state.patientName,
+        //     this.state.patientEmail,
+        //     this.props.patientAddress.password,
+        // );
+        // }
+    }
+
     render() {
         return (
             <div>
@@ -91,15 +115,14 @@ class UpdatePatient extends Component {
                                     <Form.Label>
                                         Patient Account Address
                                     </Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        name="patientAddress"
-                                        //value={patientName}
-                                        onChange={this.handleInputChange}
-                                        placeholder="Enter patient's address"
-                                        value={this.state.patientAddress}
-                                    />
+                                    <p>
+                                        {
+                                            this.props.patientAddress
+                                                .patientAddress
+                                        }
+                                    </p>
                                 </Form.Group>
+
                                 <Form.Group controlId="patientName">
                                     <Form.Label>Patient Name</Form.Label>
                                     <Form.Control
@@ -107,11 +130,9 @@ class UpdatePatient extends Component {
                                         name="patientName"
                                         //value={patientName}
                                         onChange={this.handleInputChange}
-                                        placeholder="Enter patient's name"
-                                        value={this.state.patientName}
+                                        placeholder={this.state.patientName}
                                     />
                                 </Form.Group>
-
                                 <Form.Group controlId="patientEmail">
                                     <Form.Label>
                                         Patient email address
@@ -121,21 +142,10 @@ class UpdatePatient extends Component {
                                         name="patientEmail"
                                         //value={patientEmail}
                                         onChange={this.handleInputChange}
-                                        placeholder="Enter patient's email"
-                                        value={this.state.patientEmail}
+                                        placeholder={this.state.patientEmail}
                                     />
                                 </Form.Group>
 
-                                <Form.Group controlId="password">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        name="password"
-                                        onChange={this.handleInputChange}
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                    />
-                                </Form.Group>
                                 <Button variant="primary" type="submit">
                                     Submit
                                 </Button>
@@ -149,4 +159,13 @@ class UpdatePatient extends Component {
     }
 }
 
-export default UpdatePatient;
+const mapStateToProps = (state) => {
+    return {
+        patientAddress: state.patientAddressReducer,
+    };
+};
+
+const mapDispatchToProps = () => {
+    return { set_address, get_address };
+};
+export default connect(mapStateToProps, mapDispatchToProps())(UpdatePatient);

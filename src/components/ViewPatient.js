@@ -5,9 +5,7 @@ import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
-import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { set_address } from '../actions';
+import { set_address, get_address } from '../actions';
 import { connect } from 'react-redux';
 
 class ViewPatient extends Component {
@@ -86,14 +84,12 @@ class ViewPatient extends Component {
         });
     };
 
-    updateClick = (event) => {
+    updateClick = async (event) => {
         event.preventDefault();
 
-        this.props.set_address(this.state.retrievedAddress);
-        console.log(this.props.patientAddress);
-        //.then(() => {
-        //     this.props.history.push('/updatePatient');
-        // });
+        this.props.set_address(this.state.patient);
+
+        this.props.history.push('/updatePatient');
     };
 
     deleteClick = async (event) => {
@@ -103,7 +99,6 @@ class ViewPatient extends Component {
             this.state.patient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
-
             if (!this.state.error.includes('Patient does not exist')) {
                 await this.state.contract.methods
                     .destroyPatient(this.state.patient[0])
@@ -131,6 +126,7 @@ class ViewPatient extends Component {
             this.state.patient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
+
             this.setState({ patientAddress: '' });
 
             if (!this.state.error.includes('Patient does not exist')) {
@@ -141,11 +137,8 @@ class ViewPatient extends Component {
                     console.log(error.message);
                 });
                 const patient = await result.json();
-
                 this.setState({
-                    retrievedAddress: patient.patientAddress,
-                    patientName: patient.patientName,
-                    patientEmail: patient.patientEmail,
+                    patient: patient,
                 });
             } else {
                 window.alert('No patient account with that address');
@@ -186,9 +179,9 @@ class ViewPatient extends Component {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{this.state.retrievedAddress}</td>
-                                <td>{this.state.patientName}</td>
-                                <td>{this.state.patientEmail}</td>
+                                <td>{this.state.patient.patientAddress}</td>
+                                <td>{this.state.patient.patientName}</td>
+                                <td>{this.state.patient.patientEmail}</td>
                             </tr>
                         </tbody>
                     </Table>
@@ -215,6 +208,6 @@ const mapStateToProps = (state) => {
 };
 
 const mapDispatchToProps = () => {
-    return { set_address };
+    return { set_address, get_address };
 };
 export default connect(mapStateToProps, mapDispatchToProps())(ViewPatient);
