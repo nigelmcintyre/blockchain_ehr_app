@@ -22,12 +22,13 @@ class ViewPatient extends Component {
             retrievedAddress: '',
             patientName: '',
             patientEmail: '',
+            isPatient: false,
+            deletePatientAddress: '',
 
             accounts: [],
             contract: null,
             web3: null,
             networkData: null,
-            error: '',
         };
     }
 
@@ -66,8 +67,7 @@ class ViewPatient extends Component {
                 .getPatient(accountAddress)
                 .call()
                 .catch((error) => {
-                    console.log(error.data.message);
-                    this.setState({ error: error.data.message });
+                    console.log(error);
                 });
 
             return patientBlockchainRecord;
@@ -88,32 +88,37 @@ class ViewPatient extends Component {
         event.preventDefault();
 
         this.props.set_address(this.state.patient);
-
         this.props.history.push('/updatePatient');
     };
 
+    async deletePatient(patientAddress) {
+        const patientDeleted = await this.state.contract.methods
+            .destroyPatient(patientAddress)
+            .send({ from: this.state.accounts[0] })
+            .on('confirmation', () => {
+                window.alert('Patient successfully deleted');
+            })
+            .on('error', console.error);
+
+        return patientDeleted;
+    }
+
     deleteClick = async (event) => {
         event.preventDefault();
-
         if (this.state.patientAddress) {
-            this.state.patient = await this.getPatientFromBlockchain(
+            const blockPatient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
-            if (!this.state.error.includes('Patient does not exist')) {
-                await this.state.contract.methods
-                    .destroyPatient(this.state.patient[0])
-                    .send({ from: this.state.accounts[0] })
-                    .on('confirmation', () => {
-                        console.log('Patient removed from blockchain');
-                        window.alert('Patient successfully deleted');
-                        this.setState({
-                            patientAddress: '',
-                        });
-                    })
-                    .on('error', console.error);
+            this.setState({ patient: blockPatient });
+            if (this.state.patient) {
+                this.setState({ patientAddress: '' });
+                this.deletePatient(this.state.patient[0]);
             } else {
+                this.setState({ patientAddress: '' });
                 window.alert('Patient does not exist');
             }
+        } else if (this.state.patient.patientAddress) {
+            this.deletePatient(this.state.patient.patientAddress);
         } else {
             window.alert('Please enter a patient account address');
         }
@@ -121,15 +126,16 @@ class ViewPatient extends Component {
 
     onSubmit = async (event) => {
         event.preventDefault();
+        this.setState({
+            isPatient: false,
+        });
 
         if (this.state.patientAddress) {
-            this.state.patient = await this.getPatientFromBlockchain(
+            const blockPatient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
-
-            this.setState({ patientAddress: '' });
-
-            if (!this.state.error.includes('Patient does not exist')) {
+            this.setState({ patient: blockPatient });
+            if (this.state.patient) {
                 const result = await fetch(
                     `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
                 ).catch((error) => {
@@ -139,8 +145,11 @@ class ViewPatient extends Component {
                 const patient = await result.json();
                 this.setState({
                     patient: patient,
+                    patientAddress: '',
                 });
+                this.setState({ isPatient: true });
             } else {
+                this.setState({ patientAddress: '' });
                 window.alert('No patient account with that address');
             }
         } else {
@@ -179,9 +188,21 @@ class ViewPatient extends Component {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{this.state.patient.patientAddress}</td>
-                                <td>{this.state.patient.patientName}</td>
-                                <td>{this.state.patient.patientEmail}</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.patientAddress
+                                        : ''}
+                                </td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.patientName
+                                        : ''}
+                                </td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.patientEmail
+                                        : ''}
+                                </td>
                             </tr>
                         </tbody>
                     </Table>

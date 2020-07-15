@@ -63,6 +63,7 @@ class UpdatePatient extends Component {
         this.setState({
             patientName: patient.patientAddressReducer.patientName,
             patientEmail: patient.patientAddressReducer.patientEmail,
+            password: patient.patientAddressReducer.password,
         });
     }
 
@@ -82,27 +83,40 @@ class UpdatePatient extends Component {
         });
     };
 
-    async onSubmit(event) {
-        // event.preventDefault();
-        // const patient = await store.getState();
-        // console.log(patient.patientAddressReducer.patientName);
-        // console.log(this.state.patientName);
-        // console.log(patient.patientAddressReducer.patientEmail);
-        // console.log(this.state.patientEmail);
-        // console.log(patient.patientAddressReducer.patientAddress);
-        // console.log(patient.patientAddressReducer.patientPassword);
-        // if (
-        //     this.props.patientAddress.patientName != this.state.patientName ||
-        //     this.props.patientAddress.patientEmail != this.state.patientEmail
-        // ) {
-        // await this.state.contract.methods.UpdatePatient(
-        //     this.props.patientAddress.patientAddress,
-        //     this.state.patientName,
-        //     this.state.patientEmail,
-        //     this.props.patientAddress.password,
-        // );
-        // }
-    }
+    onSubmit = async (event) => {
+        event.preventDefault();
+        let patientHash = '';
+        let file = '';
+
+        console.log('submitting file to IPFS');
+        const data = JSON.stringify({
+            patientAddress: this.props.patientAddress.patientAddress,
+            patientName: this.state.patientName,
+            patientEmail: this.state.patientEmail,
+            password: this.state.password,
+        });
+        for await (file of ipfs.add(data)) {
+            patientHash = file.path;
+            console.log('Patient uploaded to IPFS');
+        }
+        await this.state.contract.methods
+            .updatePatient(
+                this.props.patientAddress.patientAddress,
+                this.state.patientName,
+                this.state.patientEmail,
+                this.state.password,
+                patientHash,
+            )
+            .send({ from: this.state.accounts[0] })
+            .on('confirmation', () => {
+                window.alert('Patient record successfully updated');
+                this.props.history.push('/viewPatient');
+            })
+            .on('error', (error) => {
+                console.log(error);
+                window.alert('Error updating patient record please try again');
+            });
+    };
 
     render() {
         return (
@@ -150,7 +164,7 @@ class UpdatePatient extends Component {
                                     Submit
                                 </Button>
                             </Form>
-                            <p>{this.state.displayName}</p>
+                            <p>{this.state.patientName}</p>
                         </div>
                     </main>
                 </div>

@@ -96,13 +96,15 @@ contract Ehr is AccessControl{
                 doctors[_address].password);
     }
 
-    function updatPatient(address _address, 
+    function updatePatient(address _address, 
                           string memory _name,
                           string memory _email,
-                          string memory _password) public {
+                          string memory _password,
+                          string memory _patientHash) public {
       patients[_address].name = _name;
       patients[_address].email = _email;
       patients[_address].password = _password;
+      patients[_address].patientHash = _patientHash;
     }
 
     function destroyPatient(address _address) public {

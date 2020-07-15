@@ -61,8 +61,11 @@ class AddPatient extends Component {
                 .getPatient(accountAddress)
                 .call()
                 .catch((error) => {
-                    console.log(error.data.message);
-                    this.setState({ error: error.data.message });
+                    if (error.data.message === undefined) {
+                        console.log(error);
+                    } else if (error.data.message) {
+                        this.setState({ error: error.data.message });
+                    }
                 });
             return patientBlockchainRecord;
         } else {
@@ -82,6 +85,10 @@ class AddPatient extends Component {
                         displayName: `Patient ${this.patientName}'s record successfully created`,
                     });
                     this.clearInput();
+                })
+                .on('error', (error) => {
+                    console.log(error);
+                    window.alert('Error adding patient record to bloclchain.');
                 });
         } else {
             window.alert('Smart contract not deployed to detected network.');
@@ -109,12 +116,13 @@ class AddPatient extends Component {
         event.preventDefault();
         let file = '';
         let patientHash = '';
+        console.log(this.state.patientName);
         if (this.state.patientAddress) {
             this.state.patient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
 
-            if (this.state.error.includes('Patient does not exist')) {
+            if (!this.state.patient) {
                 console.log('submitting file to IPFS');
                 const data = JSON.stringify({
                     patientAddress: this.state.patientAddress,

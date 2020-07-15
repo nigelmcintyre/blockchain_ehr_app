@@ -22,6 +22,7 @@ class AddDoctor extends Component {
             contract: null,
             web3: null,
             networkData: null,
+            error: '',
         };
     }
 
@@ -58,14 +59,27 @@ class AddDoctor extends Component {
         if (this.state.networkData) {
             const doctorDetails = await this.state.contract.methods
                 .getDoctor(account)
-                .call();
-            if (doctorDetails[0].includes('0x00000000000000000')) {
+                .call()
+                .catch((error) => {
+                    if (error.data.message === undefined) {
+                        console.log(error);
+                    } else if (error.data.message) {
+                        this.setState({ error: error.data.message });
+                    }
+                });
+            if (doctorDetails) {
                 await this.state.contract.methods
                     .newDoctor(account, name, email, password)
-                    .send({ frogetPatientm: this.state.accounts[0] })
+                    .send({ from: this.state.accounts[0] })
                     .on('confirmation', () => {
                         console.log('Doctor added to the blockchain');
                         window.alert(`${name}'s record created`);
+                    })
+                    .on('error', (error) => {
+                        console.log(error);
+                        window.alert(
+                            'Error adding doctor record to bloclchain.',
+                        );
                     });
             } else {
                 window.alert(
