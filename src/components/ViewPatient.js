@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { ipfs } from '../ipfsConfig';
 import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
 import { set_address, get_address } from '../actions';
@@ -76,6 +75,20 @@ class ViewPatient extends Component {
         }
     }
 
+    async getDoctorFromBlockchain(accountAddress) {
+        if (this.state.networkData) {
+            const doctorBlockchainRecord = await this.state.contract.methods
+                .getDoctor(accountAddress)
+                .call()
+                .catch((error) => {
+                    console.log(error);
+                });
+            return doctorBlockchainRecord;
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
+    }
+
     handleInputChange = (event) => {
         event.preventDefault();
 
@@ -86,37 +99,62 @@ class ViewPatient extends Component {
 
     updateClick = async (event) => {
         event.preventDefault();
-
-        this.props.set_address(this.state.patient);
-        this.props.history.push('/updatePatient');
+        // Add patient address to redux state object
+        if (this.state.patient) {
+            this.props.set_address(this.state.patient);
+            // Open update patient page
+            this.props.history.push('/updatePatient');
+        } else {
+            window.alert('Please search for a patient');
+        }
     };
 
     async deletePatient(patientAddress) {
-        const patientDeleted = await this.state.contract.methods
-            .destroyPatient(patientAddress)
-            .send({ from: this.state.accounts[0] })
-            .on('confirmation', () => {
-                window.alert('Patient successfully deleted');
-            })
-            .on('error', console.error);
+        if (this.state.networkData) {
+            const patientDeleted = await this.state.contract.methods
+                .destroyPatient(patientAddress)
+                .send({ from: this.state.accounts[0] })
+                .on('confirmation', () => {
+                    window.alert('Patient successfully deleted');
+                    this.setState({ patient: '' });
+                })
+                .on('error', console.error);
 
-        return patientDeleted;
+            return patientDeleted;
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
     }
 
     deleteClick = async (event) => {
         event.preventDefault();
         if (this.state.patientAddress) {
-            const blockPatient = await this.getPatientFromBlockchain(
+            // Checking if address belongs to a doctor account
+            const isDoctor = await this.getDoctorFromBlockchain(
                 this.state.patientAddress,
             );
-            this.setState({ patient: blockPatient });
-            if (this.state.patient) {
-                this.setState({ patientAddress: '' });
-                this.deletePatient(this.state.patient[0]);
+            // If address doesnt belong to a doctor
+            console.log(isDoctor);
+            if (!isDoctor) {
+                // Getting patient details from blockchain
+                this.state.patient = await this.getPatientFromBlockchain(
+                    this.state.patientAddress,
+                );
+                // If patient exists
+                if (this.state.patient) {
+                    // Clear input
+                    this.setState({ patientAddress: '' });
+                    // Delete patient from blockchain
+                    this.deletePatient(this.state.patient[0]);
+                } else {
+                    this.setState({ patientAddress: '' });
+                    window.alert('Patient does not exist');
+                }
             } else {
-                this.setState({ patientAddress: '' });
-                window.alert('Patient does not exist');
+                window.alert('Address belongs to a Doctor account');
             }
+
+            // Allows for patient to be deleted if submit has been clicked
         } else if (this.state.patient.patientAddress) {
             this.deletePatient(this.state.patient.patientAddress);
         } else {
@@ -129,25 +167,26 @@ class ViewPatient extends Component {
         this.setState({
             isPatient: false,
         });
-
+        // If address input field is not empty
         if (this.state.patientAddress) {
-            const blockPatient = await this.getPatientFromBlockchain(
+            // Retrieving patient from blockchain
+            this.state.patient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
-            this.setState({ patient: blockPatient });
+            // Retrieving patient reccord from IPFS
             if (this.state.patient) {
                 const result = await fetch(
                     `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
                 ).catch((error) => {
                     window.alert('Error retrieving pataient reccord from IPFS');
-                    console.log(error.message);
+                    console.log(error);
                 });
-                const patient = await result.json();
+                const IPFSpatient = await result.json();
                 this.setState({
-                    patient: patient,
+                    patient: IPFSpatient,
                     patientAddress: '',
+                    isPatient: true,
                 });
-                this.setState({ isPatient: true });
             } else {
                 this.setState({ patientAddress: '' });
                 window.alert('No patient account with that address');

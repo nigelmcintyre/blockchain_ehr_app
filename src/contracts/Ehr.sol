@@ -90,10 +90,14 @@ contract Ehr is AccessControl{
     }
 
     function getDoctor(address _address) public view returns (address, string memory, string memory, string memory){
-        return (doctors[_address].addr,
+        if(doctors[_address].addr == _address){
+          return (doctors[_address].addr,
                 doctors[_address].name,
                 doctors[_address].email,
                 doctors[_address].password);
+        }
+        revert('Doctor does not exist');
+            
     }
 
     function updatePatient(address _address, 

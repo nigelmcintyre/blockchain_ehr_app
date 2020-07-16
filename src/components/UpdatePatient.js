@@ -164,7 +164,6 @@ class UpdatePatient extends Component {
                                     Submit
                                 </Button>
                             </Form>
-                            <p>{this.state.patientName}</p>
                         </div>
                     </main>
                 </div>

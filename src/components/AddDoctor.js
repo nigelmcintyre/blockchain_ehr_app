@@ -22,7 +22,6 @@ class AddDoctor extends Component {
             contract: null,
             web3: null,
             networkData: null,
-            error: '',
         };
     }
 
@@ -57,23 +56,29 @@ class AddDoctor extends Component {
     // Extract function to it's onw file
     async addDoctorToBlockchain(account, name, email, password) {
         if (this.state.networkData) {
+            // Check that address already belongs to a doctor account
             const doctorDetails = await this.state.contract.methods
                 .getDoctor(account)
                 .call()
                 .catch((error) => {
-                    if (error.data.message === undefined) {
-                        console.log(error);
-                    } else if (error.data.message) {
-                        this.setState({ error: error.data.message });
-                    }
+                    console.log(error);
                 });
-            if (doctorDetails) {
+            // Check that address already belongs to a patient account
+            const patient = await this.state.contract.methods
+                .getPatient(account)
+                .call()
+                .catch((error) => {
+                    console.log(error);
+                });
+            // If address isnt't already assigned to an account
+            if (!doctorDetails && !patient) {
                 await this.state.contract.methods
                     .newDoctor(account, name, email, password)
                     .send({ from: this.state.accounts[0] })
                     .on('confirmation', () => {
                         console.log('Doctor added to the blockchain');
                         window.alert(`${name}'s record created`);
+                        this.clearInput();
                     })
                     .on('error', (error) => {
                         console.log(error);
@@ -82,9 +87,7 @@ class AddDoctor extends Component {
                         );
                     });
             } else {
-                window.alert(
-                    "This address already belongs to a doctor's accounts",
-                );
+                window.alert('This address already belongs to an account');
                 this.clearInput();
             }
         } else {
@@ -110,7 +113,7 @@ class AddDoctor extends Component {
     };
     onSubmit = async (event) => {
         event.preventDefault();
-
+        // Check that input field is not empty
         if (this.state.doctorAddress) {
             await this.addDoctorToBlockchain(
                 this.state.doctorAddress,

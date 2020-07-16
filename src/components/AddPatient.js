@@ -24,7 +24,6 @@ class AddPatient extends Component {
             contract: null,
             web3: null,
             networkData: null,
-            error: '',
         };
     }
     async loadBlockchainData() {
@@ -61,22 +60,31 @@ class AddPatient extends Component {
                 .getPatient(accountAddress)
                 .call()
                 .catch((error) => {
-                    if (error.data.message === undefined) {
-                        console.log(error);
-                    } else if (error.data.message) {
-                        this.setState({ error: error.data.message });
-                    }
+                    console.log(error);
                 });
             return patientBlockchainRecord;
         } else {
             window.alert('Smart contract not deployed to detected network.');
         }
     }
-    async addPatientToBlockchain(accountAddress, name, email, password, hash) {
-        // If blockchin connection is successful
+
+    async getDoctorFromBlockchain(accountAddress) {
         if (this.state.networkData) {
-            // Invoke smart contract addPatient function
+            const doctorBlockchainRecord = await this.state.contract.methods
+                .getDoctor(accountAddress)
+                .call()
+                .catch((error) => {
+                    console.log(error);
+                });
+            return doctorBlockchainRecord;
+        } else {
+            window.alert('Smart contract not deployed to detected network.');
+        }
+    }
+    async addPatientToBlockchain(accountAddress, name, email, password, hash) {
+        if (this.state.networkData) {
             await this.state.contract.methods
+                // Adding patient to blockchain
                 .newPatient(accountAddress, name, email, password, hash)
                 .send({ from: this.state.accounts[0] })
                 .on('confirmation', () => {
@@ -111,30 +119,36 @@ class AddPatient extends Component {
             [event.target.name]: event.target.value,
         });
     };
-    // https://ipfs.infura.io/ipfs/QmWRyEzzHEf4sRbUniSsoRKo59n25peXta8pSGYZrFqbu7
     onSubmit = async (event) => {
         event.preventDefault();
         let file = '';
         let patientHash = '';
-        console.log(this.state.patientName);
+        // If input field is not empty
         if (this.state.patientAddress) {
+            // Checking if address belongs to a patient account
             this.state.patient = await this.getPatientFromBlockchain(
                 this.state.patientAddress,
             );
-
-            if (!this.state.patient) {
+            // Checking if address belongs to doctor account
+            const isDoctor = await this.getDoctorFromBlockchain(
+                this.state.patientAddress,
+            );
+            // If address doesn't belong to an account
+            if (!this.state.patient && !isDoctor) {
                 console.log('submitting file to IPFS');
+
                 const data = JSON.stringify({
                     patientAddress: this.state.patientAddress,
                     patientName: this.state.patientName,
                     patientEmail: this.state.patientEmail,
                     password: this.state.password,
                 });
+                // Adding patient record to IPFS
                 for await (file of ipfs.add(data)) {
                     patientHash = file.path;
                     console.log('Patient uploaded to IPFS');
                 }
-
+                // Adding patient record to blockchain
                 await this.addPatientToBlockchain(
                     this.state.patientAddress,
                     this.state.patientName,
@@ -143,9 +157,7 @@ class AddPatient extends Component {
                     patientHash,
                 );
             } else {
-                window.alert(
-                    "This address already belongs to a patient's record",
-                );
+                window.alert('This address already belongs to an account');
                 this.clearInput();
             }
         } else {
