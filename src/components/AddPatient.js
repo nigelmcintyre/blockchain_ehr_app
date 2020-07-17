@@ -26,6 +26,7 @@ class AddPatient extends Component {
             networkData: null,
         };
     }
+
     async loadBlockchainData() {
         // Setting up connection to blockchain
         const web3 = window.web3;
@@ -42,6 +43,8 @@ class AddPatient extends Component {
             await web3.eth.getAccounts().then((_accounts) => {
                 this.setState({ accounts: _accounts });
             });
+            const newAccount = await web3.eth.accounts.create();
+            console.log(newAccount);
 
             // Getting the contract instance
             const contract = web3.eth.Contract(
@@ -86,7 +89,7 @@ class AddPatient extends Component {
             await this.state.contract.methods
                 // Adding patient to blockchain
                 .newPatient(accountAddress, name, email, password, hash)
-                .send({ from: this.state.accounts[0] })
+                .send({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
                 .on('confirmation', () => {
                     console.log('Patient added to the blockchain');
                     this.setState({

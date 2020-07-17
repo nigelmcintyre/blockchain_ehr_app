@@ -64,7 +64,7 @@ class ViewPatient extends Component {
         if (this.state.networkData) {
             const patientBlockchainRecord = await this.state.contract.methods
                 .getPatient(accountAddress)
-                .call()
+                .call({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
                 .catch((error) => {
                     console.log(error);
                 });
@@ -113,7 +113,7 @@ class ViewPatient extends Component {
         if (this.state.networkData) {
             const patientDeleted = await this.state.contract.methods
                 .destroyPatient(patientAddress)
-                .send({ from: this.state.accounts[0] })
+                .send({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
                 .on('confirmation', () => {
                     window.alert('Patient successfully deleted');
                     this.setState({ patient: '' });
@@ -178,7 +178,7 @@ class ViewPatient extends Component {
                 const result = await fetch(
                     `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
                 ).catch((error) => {
-                    window.alert('Error retrieving pataient reccord from IPFS');
+                    window.alert('Error retrieving patient reccord from IPFS');
                     console.log(error);
                 });
                 const IPFSpatient = await result.json();
