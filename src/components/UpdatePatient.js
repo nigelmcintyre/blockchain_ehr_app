@@ -7,11 +7,12 @@ import LoadWeb3 from '../loadWeb3';
 import { get_address, set_address } from '../actions';
 import { connect } from 'react-redux';
 import store from '../index';
+import { loadBlockchainData } from '../BlockchainAccess.js';
 
 class UpdatePatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
-        await this.loadBlockchainData();
+        this.state.blockchainData = await loadBlockchainData();
         await this.populateFields();
     }
 
@@ -24,38 +25,8 @@ class UpdatePatient extends Component {
             patientEmail: '',
             displayName: '',
 
-            accounts: [],
-            contract: null,
-            web3: null,
-            networkData: null,
+            blockchainData: {},
         };
-    }
-    async loadBlockchainData() {
-        // Setting up connection to blockchain
-        const web3 = window.web3;
-        this.setState({ web3: web3 });
-
-        // Getting blockchain network ID
-        const networkId = await web3.eth.net.getId();
-
-        // Getting the network where the contract is
-        const networkData = Ehr.networks[networkId];
-        this.setState({ networkData: networkData });
-        if (networkData) {
-            // Getting the account address of the current user
-            await web3.eth.getAccounts().then((_accounts) => {
-                this.setState({ accounts: _accounts });
-            });
-
-            // Getting the contract instance
-            const contract = web3.eth.Contract(
-                Ehr.abi,
-                this.state.networkData.address,
-            );
-            this.setState({ contract });
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
     }
 
     async populateFields() {
@@ -99,7 +70,7 @@ class UpdatePatient extends Component {
             patientHash = file.path;
             console.log('Patient uploaded to IPFS');
         }
-        await this.state.contract.methods
+        await this.state.blockchainData.contract.methods
             .updatePatient(
                 this.props.patientAddress.patientAddress,
                 this.state.patientName,
@@ -107,7 +78,7 @@ class UpdatePatient extends Component {
                 this.state.password,
                 patientHash,
             )
-            .send({ from: this.state.accounts[0] })
+            .send({ from: this.state.blockchainData.accounts[0] })
             .on('confirmation', () => {
                 window.alert('Patient record successfully updated');
                 this.props.history.push('/viewPatient');

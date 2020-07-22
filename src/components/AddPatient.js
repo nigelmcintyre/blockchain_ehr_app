@@ -2,110 +2,31 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
-import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
+import {
+    loadBlockchainData,
+    addPatientToBlockchain,
+    getPatientFromBlockchain,
+    getDoctorFromBlockchain,
+} from '../BlockchainAccess.js';
 
 class AddPatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
-        await this.loadBlockchainData();
+        this.state.blockchainData = await loadBlockchainData();
     }
     constructor(props) {
         super(props);
         this.state = {
-            patient: '',
             patientAddress: '',
             patientName: '',
             patientEmail: '',
             password: '',
             displayName: '',
 
-            accounts: [],
-            contract: null,
-            web3: null,
-            networkData: null,
+            blockchainData: {},
         };
     }
-
-    async loadBlockchainData() {
-        // Setting up connection to blockchain
-        const web3 = window.web3;
-        this.setState({ web3: web3 });
-
-        // Getting blockchain network ID
-        const networkId = await web3.eth.net.getId();
-
-        // Getting the network where the contract is
-        const networkData = Ehr.networks[networkId];
-        this.setState({ networkData: networkData });
-        if (networkData) {
-            // Getting the account address of the current user
-            await web3.eth.getAccounts().then((_accounts) => {
-                this.setState({ accounts: _accounts });
-            });
-            const newAccount = await web3.eth.accounts.create();
-            console.log(newAccount);
-
-            // Getting the contract instance
-            const contract = web3.eth.Contract(
-                Ehr.abi,
-                this.state.networkData.address,
-            );
-            this.setState({ contract });
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
-    async getPatientFromBlockchain(accountAddress) {
-        if (this.state.networkData) {
-            const patientBlockchainRecord = await this.state.contract.methods
-                .getPatient(accountAddress)
-                .call()
-                .catch((error) => {
-                    console.log(error);
-                });
-            return patientBlockchainRecord;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
-    async getDoctorFromBlockchain(accountAddress) {
-        if (this.state.networkData) {
-            const doctorBlockchainRecord = await this.state.contract.methods
-                .getDoctor(accountAddress)
-                .call()
-                .catch((error) => {
-                    console.log(error);
-                });
-            return doctorBlockchainRecord;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-    async addPatientToBlockchain(accountAddress, name, email, password, hash) {
-        if (this.state.networkData) {
-            await this.state.contract.methods
-                // Adding patient to blockchain
-                .newPatient(accountAddress, name, email, password, hash)
-                .send({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
-                .on('confirmation', () => {
-                    console.log('Patient added to the blockchain');
-                    this.setState({
-                        displayName: `Patient ${this.patientName}'s record successfully created`,
-                    });
-                    this.clearInput();
-                })
-                .on('error', (error) => {
-                    console.log(error);
-                    window.alert('Error adding patient record to bloclchain.');
-                });
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
     clearInput() {
         this.setState({
             patientAddress: '',
@@ -129,16 +50,30 @@ class AddPatient extends Component {
         // If input field is not empty
         if (this.state.patientAddress) {
             // Checking if address belongs to a patient account
-            this.state.patient = await this.getPatientFromBlockchain(
+            const isPatient = await getPatientFromBlockchain(
                 this.state.patientAddress,
+                this.state.blockchainData.networkData,
+                this.state.blockchainData.contract,
+                this.state.blockchainData.accounts,
             );
+
+            console.log(isPatient);
             // Checking if address belongs to doctor account
-            const isDoctor = await this.getDoctorFromBlockchain(
+            const isDoctor = await getDoctorFromBlockchain(
                 this.state.patientAddress,
+                this.state.blockchainData.networkData,
+                this.state.blockchainData.contract,
+                this.state.blockchainData.accounts,
             );
+            console.log(isDoctor);
+
             // If address doesn't belong to an account
-            if (!this.state.patient && !isDoctor) {
+            if (!isPatient && !isDoctor) {
                 console.log('submitting file to IPFS');
+                let address = this.state.patientAddress;
+                let name = this.state.patientName;
+                let email = this.state.patientEmail;
+                let password = this.state.password;
 
                 const data = JSON.stringify({
                     patientAddress: this.state.patientAddress,
@@ -151,13 +86,17 @@ class AddPatient extends Component {
                     patientHash = file.path;
                     console.log('Patient uploaded to IPFS');
                 }
+                this.clearInput();
                 // Adding patient record to blockchain
-                await this.addPatientToBlockchain(
-                    this.state.patientAddress,
-                    this.state.patientName,
-                    this.state.patientEmail,
-                    this.state.password,
+                await addPatientToBlockchain(
+                    address,
+                    name,
+                    email,
+                    password,
                     patientHash,
+                    this.state.blockchainData.networkData,
+                    this.state.blockchainData.contract,
+                    this.state.blockchainData.accounts,
                 );
             } else {
                 window.alert('This address already belongs to an account');
@@ -167,6 +106,7 @@ class AddPatient extends Component {
             window.alert('Please enter patient details');
             this.clearInput();
         }
+        this.clearInput();
     };
 
     componentDidMount = async () => {};

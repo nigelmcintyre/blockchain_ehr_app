@@ -120,8 +120,8 @@ contract('Ehr', (accounts) => {
         });
     });
 
-    describe('Not new patient', async () => {
-        it('should not add new patient', async () => {
+    describe('Not new patient patient', async () => {
+        it('should not add new patient from patient', async () => {
             try {
                 await ehr.newPatient(
                     accounts[3],
@@ -134,6 +134,27 @@ contract('Ehr', (accounts) => {
                     },
                 );
             } catch (e) {
+                assert(e.message.includes('Restricted to doctors.'));
+            }
+            return;
+        });
+    });
+
+    describe('Not new patient admin', async () => {
+        it('should not add new patient from admin', async () => {
+            try {
+                await ehr.newPatient(
+                    accounts[3],
+                    'Nigel',
+                    'email',
+                    'password',
+                    'hash',
+                    {
+                        from: admin,
+                    },
+                );
+            } catch (e) {
+                console.log(e.message);
                 assert(e.message.includes('Restricted to doctors.'));
             }
             return;

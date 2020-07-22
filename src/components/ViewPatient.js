@@ -6,11 +6,17 @@ import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
 import { set_address, get_address } from '../actions';
 import { connect } from 'react-redux';
+import {
+    loadBlockchainData,
+    deletePatient,
+    getPatientFromBlockchain,
+    getDoctorFromBlockchain,
+} from '../BlockchainAccess.js';
 
 class ViewPatient extends Component {
     async componentWillMount() {
         await LoadWeb3();
-        await this.loadBlockchainData();
+        this.state.blockchainData = await loadBlockchainData();
     }
 
     constructor(props) {
@@ -24,69 +30,8 @@ class ViewPatient extends Component {
             isPatient: false,
             deletePatientAddress: '',
 
-            accounts: [],
-            contract: null,
-            web3: null,
-            networkData: null,
+            blockchainData: {},
         };
-    }
-
-    async loadBlockchainData() {
-        // Setting up connection to blockchain
-        const web3 = window.web3;
-        this.setState({ web3: web3 });
-
-        // Getting blockchain network ID
-        const networkId = await web3.eth.net.getId();
-
-        // Getting the network where the contract is
-        const networkData = Ehr.networks[networkId];
-        this.setState({ networkData: networkData });
-
-        if (networkData) {
-            // Getting the account address of the current user
-            await web3.eth.getAccounts().then((_accounts) => {
-                this.setState({ accounts: _accounts });
-            });
-
-            // Getting the contract instance
-            const contract = await web3.eth.Contract(
-                Ehr.abi,
-                this.state.networkData.address,
-            );
-            this.setState({ contract });
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
-    async getPatientFromBlockchain(accountAddress) {
-        if (this.state.networkData) {
-            const patientBlockchainRecord = await this.state.contract.methods
-                .getPatient(accountAddress)
-                .call({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
-                .catch((error) => {
-                    console.log(error);
-                });
-
-            return patientBlockchainRecord;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
-    async getDoctorFromBlockchain(accountAddress) {
-        if (this.state.networkData) {
-            const doctorBlockchainRecord = await this.state.contract.methods
-                .getDoctor(accountAddress)
-                .call()
-                .catch((error) => {
-                    console.log(error);
-                });
-            return doctorBlockchainRecord;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
     }
 
     handleInputChange = (event) => {
@@ -109,43 +54,36 @@ class ViewPatient extends Component {
         }
     };
 
-    async deletePatient(patientAddress) {
-        if (this.state.networkData) {
-            const patientDeleted = await this.state.contract.methods
-                .destroyPatient(patientAddress)
-                .send({ from: '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711' })
-                .on('confirmation', () => {
-                    window.alert('Patient successfully deleted');
-                    this.setState({ patient: '' });
-                })
-                .on('error', console.error);
-
-            return patientDeleted;
-        } else {
-            window.alert('Smart contract not deployed to detected network.');
-        }
-    }
-
     deleteClick = async (event) => {
         event.preventDefault();
         if (this.state.patientAddress) {
             // Checking if address belongs to a doctor account
-            const isDoctor = await this.getDoctorFromBlockchain(
+            const isDoctor = await getDoctorFromBlockchain(
                 this.state.patientAddress,
+                this.state.blockchainData.networkData,
+                this.state.blockchainData.contract,
+                this.state.blockchainData.accounts,
             );
             // If address doesnt belong to a doctor
-            console.log(isDoctor);
             if (!isDoctor) {
                 // Getting patient details from blockchain
-                this.state.patient = await this.getPatientFromBlockchain(
+                const isPatient = await getPatientFromBlockchain(
                     this.state.patientAddress,
+                    this.state.blockchainData.networkData,
+                    this.state.blockchainData.contract,
+                    this.state.blockchainData.accounts,
                 );
                 // If patient exists
-                if (this.state.patient) {
+                if (isPatient) {
                     // Clear input
                     this.setState({ patientAddress: '' });
                     // Delete patient from blockchain
-                    this.deletePatient(this.state.patient[0]);
+                    await deletePatient(
+                        isPatient[0],
+                        this.state.blockchainData.networkData,
+                        this.state.blockchainData.contract,
+                        this.state.blockchainData.accounts,
+                    );
                 } else {
                     this.setState({ patientAddress: '' });
                     window.alert('Patient does not exist');
@@ -156,7 +94,12 @@ class ViewPatient extends Component {
 
             // Allows for patient to be deleted if submit has been clicked
         } else if (this.state.patient.patientAddress) {
-            this.deletePatient(this.state.patient.patientAddress);
+            deletePatient(
+                this.state.patient.patientAddress,
+                this.state.blockchainData.networkData,
+                this.state.blockchainData.contract,
+                this.state.blockchainData.accounts,
+            );
         } else {
             window.alert('Please enter a patient account address');
         }
@@ -170,8 +113,11 @@ class ViewPatient extends Component {
         // If address input field is not empty
         if (this.state.patientAddress) {
             // Retrieving patient from blockchain
-            this.state.patient = await this.getPatientFromBlockchain(
+            this.state.patient = await getPatientFromBlockchain(
                 this.state.patientAddress,
+                this.state.blockchainData.networkData,
+                this.state.blockchainData.contract,
+                this.state.blockchainData.accounts,
             );
             // Retrieving patient reccord from IPFS
             if (this.state.patient) {
