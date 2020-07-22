@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Ehr from '../abis/Ehr.json';
 import LoadWeb3 from '../loadWeb3';
 import { set_address, get_address } from '../actions';
 import { connect } from 'react-redux';

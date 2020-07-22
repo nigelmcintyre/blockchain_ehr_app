@@ -139,7 +139,7 @@ export async function deletePatient(
     accounts,
 ) {
     if (networkData) {
-        const patientDeleted = await contract.methods
+        await contract.methods
             .destroyPatient(patientAddress)
             .send({ from: accounts[0] })
             .on('confirmation', () => {
