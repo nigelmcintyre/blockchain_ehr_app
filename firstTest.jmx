@@ -60,7 +60,7 @@
             </collectionProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">192.168.0.164</stringProp>
-          <stringProp name="HTTPSampler.port">3000</stringProp>
+          <stringProp name="HTTPSampler.port">7545</stringProp>
           <stringProp name="HTTPSampler.protocol"></stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/addPatient</stringProp>

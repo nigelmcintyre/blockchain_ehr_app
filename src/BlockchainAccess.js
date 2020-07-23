@@ -43,8 +43,8 @@ export async function getPatientFromBlockchain(
         const patientBlockchainRecord = await contract.methods
             .getPatient(accountAddress)
             .call({ from: accounts[0] })
-            .catch((error) => {
-                console.log(error);
+            .catch(() => {
+                console.log('Patient does not exist');
             });
 
         if (patientBlockchainRecord[0].includes('0x0000')) {
@@ -69,8 +69,8 @@ export async function getDoctorFromBlockchain(
         const doctorBlockchainRecord = await contract.methods
             .getDoctor(accountAddress)
             .call({ from: accounts[0] })
-            .catch((error) => {
-                console.log(error);
+            .catch(() => {
+                console.log('Doctor does not exist');
             });
         return doctorBlockchainRecord;
     } else {
