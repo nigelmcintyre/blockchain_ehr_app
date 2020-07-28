@@ -3,6 +3,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
 import LoadWeb3 from '../loadWeb3';
+import Web3 from 'web3';
 import {
     loadBlockchainData,
     addPatientToBlockchain,
@@ -12,8 +13,9 @@ import {
 
 class AddPatient extends Component {
     async componentWillMount() {
-        await LoadWeb3();
-        this.state.blockchainData = await loadBlockchainData();
+        //await LoadWeb3();
+        const web3 = new Web3('http://127.0.0.1:7545');
+        this.state.blockchainData = await loadBlockchainData(web3);
     }
     constructor(props) {
         super(props);
@@ -23,6 +25,8 @@ class AddPatient extends Component {
             patientEmail: '',
             password: '',
             displayName: '',
+            doctorAddress: '',
+            doctorKey: '',
 
             blockchainData: {},
         };
@@ -56,7 +60,6 @@ class AddPatient extends Component {
                 this.state.blockchainData.contract,
                 this.state.blockchainData.accounts,
             );
-
             console.log(isPatient);
             // Checking if address belongs to doctor account
             const isDoctor = await getDoctorFromBlockchain(
@@ -65,7 +68,6 @@ class AddPatient extends Component {
                 this.state.blockchainData.contract,
                 this.state.blockchainData.accounts,
             );
-            console.log(isDoctor);
 
             // If address doesn't belong to an account
             if (!isPatient && !isDoctor) {
@@ -74,6 +76,8 @@ class AddPatient extends Component {
                 let name = this.state.patientName;
                 let email = this.state.patientEmail;
                 let password = this.state.password;
+                let doctorAddress = this.state.doctorAddress;
+                let doctorKey = this.state.doctorKey;
 
                 const data = JSON.stringify({
                     patientAddress: this.state.patientAddress,
@@ -88,15 +92,18 @@ class AddPatient extends Component {
                 }
                 this.clearInput();
                 // Adding patient record to blockchain
+                console.log('Adding patient to blockchain');
                 await addPatientToBlockchain(
                     address,
                     name,
                     email,
                     password,
                     patientHash,
+                    doctorAddress,
+                    doctorKey,
+                    this.state.blockchainData.web3,
                     this.state.blockchainData.networkData,
                     this.state.blockchainData.contract,
-                    this.state.blockchainData.accounts,
                 );
             } else {
                 window.alert('This address already belongs to an account');
@@ -109,7 +116,6 @@ class AddPatient extends Component {
         this.clearInput();
     };
 
-    componentDidMount = async () => {};
     render() {
         return (
             <div>
@@ -124,7 +130,6 @@ class AddPatient extends Component {
                                     <Form.Control
                                         type="text"
                                         name="patientAddress"
-                                        //value={patientName}
                                         onChange={this.handleInputChange}
                                         placeholder="Enter patient's address"
                                         value={this.state.patientAddress}
@@ -164,6 +169,28 @@ class AddPatient extends Component {
                                         onChange={this.handleInputChange}
                                         placeholder="Password"
                                         value={this.state.password}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="doctorAddress">
+                                    <Form.Label>
+                                        Doctor Account Address
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="doctorAddress"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter doctor's account address"
+                                        value={this.state.doctorAddress}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="doctorKey">
+                                    <Form.Label>Doctor Private Key</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="doctorKey"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter doctor's private key"
+                                        value={this.state.doctorKey}
                                     />
                                 </Form.Group>
                                 <Button variant="primary" type="submit">

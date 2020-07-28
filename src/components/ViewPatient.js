@@ -11,11 +11,12 @@ import {
     getPatientFromBlockchain,
     getDoctorFromBlockchain,
 } from '../BlockchainAccess.js';
+import Web3 from 'web3';
 
 class ViewPatient extends Component {
     async componentWillMount() {
-        await LoadWeb3();
-        this.state.blockchainData = await loadBlockchainData();
+        const web3 = new Web3('http://127.0.0.1:7545');
+        this.state.blockchainData = await loadBlockchainData(web3);
     }
 
     constructor(props) {
@@ -79,6 +80,7 @@ class ViewPatient extends Component {
                     // Delete patient from blockchain
                     await deletePatient(
                         isPatient[0],
+                        this.state.blockchainData.web3,
                         this.state.blockchainData.networkData,
                         this.state.blockchainData.contract,
                         this.state.blockchainData.accounts,
@@ -95,10 +97,14 @@ class ViewPatient extends Component {
         } else if (this.state.patient.patientAddress) {
             deletePatient(
                 this.state.patient.patientAddress,
+                this.state.blockchainData.web3,
                 this.state.blockchainData.networkData,
                 this.state.blockchainData.contract,
                 this.state.blockchainData.accounts,
             );
+            this.setState({
+                patient: '',
+            });
         } else {
             window.alert('Please enter a patient account address');
         }

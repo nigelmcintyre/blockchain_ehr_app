@@ -7,11 +7,12 @@ import { get_address, set_address } from '../actions';
 import { connect } from 'react-redux';
 import store from '../index';
 import { loadBlockchainData } from '../BlockchainAccess.js';
+import Web3 from 'web3';
 
 class UpdatePatient extends Component {
     async componentWillMount() {
-        await LoadWeb3();
-        this.state.blockchainData = await loadBlockchainData();
+        const web3 = new Web3('http://127.0.0.1:7545');
+        this.state.blockchainData = await loadBlockchainData(web3);
         await this.populateFields();
     }
 
@@ -69,22 +70,56 @@ class UpdatePatient extends Component {
             patientHash = file.path;
             console.log('Patient uploaded to IPFS');
         }
-        await this.state.blockchainData.contract.methods
-            .updatePatient(
-                this.props.patientAddress.patientAddress,
-                this.state.patientName,
-                this.state.patientEmail,
-                this.state.password,
-                patientHash,
+
+        // Getting Tx nonce value of transaction sender
+        const nonce = await this.state.blockchainData.web3.eth.getTransactionCount(
+            this.state.blockchainData.accounts[0],
+        );
+
+        // Contract method ABI
+        const txBuilder = await this.state.blockchainData.contract.methods.newPatient(
+            this.props.patientAddress.patientAddress,
+            this.state.patientName,
+            this.state.patientEmail,
+            this.state.password,
+            patientHash,
+        );
+        const encodedTx = txBuilder.encodeABI();
+
+        const transactionObject = {
+            nonce: nonce,
+            from: this.state.blockchainData.accounts[0],
+            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            gas: '300000',
+            data: encodedTx,
+        };
+
+        this.state.blockchainData.web3.eth.accounts
+            .signTransaction(
+                transactionObject,
+                '38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0',
             )
-            .send({ from: this.state.blockchainData.accounts[0] })
-            .on('confirmation', () => {
-                window.alert('Patient record successfully updated');
-                this.props.history.push('/viewPatient');
+            .then((signedTx) => {
+                const sentTx = this.state.blockchainData.web3.eth.sendSignedTransaction(
+                    signedTx.raw || signedTx.rawTransaction,
+                );
+                sentTx.on('confirmation', () => {
+                    console.log(`Patient record updated on blockchain`);
+                    window.alert(
+                        `${this.state.patientName}'s record successfully updates`,
+                    );
+                    this.props.history.push('/viewPatient');
+                });
+                sentTx.on('error', (err) => {
+                    console.log(err);
+                    window.alert(
+                        'Error sending signed transaction to blockchain.',
+                    );
+                });
             })
-            .on('error', (error) => {
-                console.log(error);
-                window.alert('Error updating patient record please try again');
+            .catch((err) => {
+                console.log(err);
+                window.alert('Error signing transaction.');
             });
     };
 

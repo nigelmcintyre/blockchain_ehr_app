@@ -1,6 +1,8 @@
 import Ehr from './abis/Ehr.json';
+import Tx from 'ethereumjs-tx';
+// Contract address: 0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f
 
-export async function loadBlockchainData() {
+export async function loadBlockchainData(web3) {
     const blockchainData = {
         web3: '',
         networkId: '',
@@ -9,15 +11,16 @@ export async function loadBlockchainData() {
         contract: '',
     };
     // Setting up connection to blockchain
-    const web3 = window.web3;
     blockchainData.web3 = web3;
 
     // Getting blockchain network ID
     const networkId = await web3.eth.net.getId();
     blockchainData.networkId = networkId;
+
     // Getting the network where the contract is
     const networkData = Ehr.networks[networkId];
     blockchainData.networkData = networkData;
+
     if (networkData) {
         // Getting the account address of the current user
         const accounts = await web3.eth.getAccounts().then((_accounts) => {
@@ -28,6 +31,7 @@ export async function loadBlockchainData() {
         // Getting the contract instance
         const contract = await web3.eth.Contract(Ehr.abi, networkData.address);
         blockchainData.contract = contract;
+
         return blockchainData;
     } else {
         window.alert('Smart contract not deployed to detected network.');
@@ -84,22 +88,54 @@ export async function addPatientToBlockchain(
     email,
     password,
     hash,
+    doctorAddress,
+    doctorKey,
+    web3,
     networkData,
     contract,
-    accounts,
 ) {
     if (networkData) {
-        await contract.methods
-            // Adding patient to blockchain
-            .newPatient(accountAddress, name, email, password, hash)
-            .send({ from: accounts[0] })
-            .on('confirmation', () => {
-                console.log('Patient added to the blockchain');
-                window.alert(`${name}'s record successfully created`);
+        // Getting Tx nonce value of transaction sender
+        const nonce = await web3.eth.getTransactionCount(doctorAddress);
+
+        // Contract method ABI
+        const txBuilder = await contract.methods.newPatient(
+            accountAddress,
+            name,
+            email,
+            password,
+            hash,
+        );
+        const encodedTx = txBuilder.encodeABI();
+
+        const transactionObject = {
+            nonce: nonce,
+            from: doctorAddress,
+            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            gas: '300000',
+            data: encodedTx,
+        };
+
+        web3.eth.accounts
+            .signTransaction(transactionObject, doctorKey)
+            .then((signedTx) => {
+                const sentTx = web3.eth.sendSignedTransaction(
+                    signedTx.raw || signedTx.rawTransaction,
+                );
+                sentTx.on('confirmation', () => {
+                    console.log(`Patient added to blockchain`);
+                    window.alert(`${name}'s record successfully created`);
+                });
+                sentTx.on('error', (err) => {
+                    console.log(err);
+                    window.alert(
+                        'Error sending signed transaction to blockchain.',
+                    );
+                });
             })
-            .on('error', (error) => {
-                console.log(error);
-                window.alert('Error adding patient record to blockchain.');
+            .catch((err) => {
+                console.log(err);
+                window.alert('Error signing transaction.');
             });
     } else {
         window.alert('Smart contract not deployed to detected network.');
@@ -111,21 +147,54 @@ export async function addDoctorToBlockchain(
     name,
     email,
     password,
+    web3,
     networkData,
     contract,
     accounts,
 ) {
     if (networkData) {
-        await contract.methods
-            .newDoctor(account, name, email, password)
-            .send({ from: accounts[0] })
-            .on('confirmation', () => {
-                console.log('Doctor added to the blockchain');
-                window.alert(`Doctor ${name} successfully created`);
+        const nonce = await web3.eth.getTransactionCount(accounts[0]);
+
+        // Contract method ABI
+        const txBuilder = await contract.methods.newDoctor(
+            account,
+            name,
+            email,
+            password,
+        );
+        const encodedTx = txBuilder.encodeABI();
+
+        const transactionObject = {
+            nonce: nonce,
+            from: accounts[0],
+            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            gas: '300000',
+            data: encodedTx,
+        };
+
+        web3.eth.accounts
+            .signTransaction(
+                transactionObject,
+                '38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0',
+            )
+            .then((signedTx) => {
+                const sentTx = web3.eth.sendSignedTransaction(
+                    signedTx.raw || signedTx.rawTransaction,
+                );
+                sentTx.on('confirmation', () => {
+                    console.log(`Doctor added to blockchain`);
+                    window.alert(`Doctor ${name}, successfully created`);
+                });
+                sentTx.on('error', (err) => {
+                    console.log(err);
+                    window.alert(
+                        'Error sending signed transaction to blockchain.',
+                    );
+                });
             })
-            .on('error', (error) => {
-                console.log(error);
-                window.alert('Error adding doctor record to blockchain.');
+            .catch((err) => {
+                console.log(err);
+                window.alert('Error signing transaction.');
             });
     } else {
         window.alert('Smart contract not deployed to detected network.');
@@ -134,20 +203,49 @@ export async function addDoctorToBlockchain(
 
 export async function deletePatient(
     patientAddress,
+    web3,
     networkData,
     contract,
     accounts,
 ) {
     if (networkData) {
-        await contract.methods
-            .destroyPatient(patientAddress)
-            .send({ from: accounts[0] })
-            .on('confirmation', () => {
-                window.alert(`Patient successfully deleted`);
+        const nonce = await web3.eth.getTransactionCount(accounts[0]);
+
+        // Contract method ABI
+        const txBuilder = await contract.methods.destroyPatient(patientAddress);
+        const encodedTx = txBuilder.encodeABI();
+
+        const transactionObject = {
+            nonce: nonce,
+            from: accounts[0],
+            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            gas: '300000',
+            data: encodedTx,
+        };
+
+        web3.eth.accounts
+            .signTransaction(
+                transactionObject,
+                '38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0',
+            )
+            .then((signedTx) => {
+                const sentTx = web3.eth.sendSignedTransaction(
+                    signedTx.raw || signedTx.rawTransaction,
+                );
+                sentTx.on('confirmation', () => {
+                    console.log(`Patient record deleted from blockchain`);
+                    window.alert(`Patient record successfully deleted`);
+                });
+                sentTx.on('error', (err) => {
+                    console.log(err);
+                    window.alert(
+                        'Error sending signed transaction to blockchain.',
+                    );
+                });
             })
-            .on('error', (error) => {
-                console.log(error);
-                window.alert('Error deleting patient record please try again');
+            .catch((err) => {
+                console.log(err);
+                window.alert('Error signing transaction.');
             });
     } else {
         window.alert('Smart contract not deployed to detected network.');

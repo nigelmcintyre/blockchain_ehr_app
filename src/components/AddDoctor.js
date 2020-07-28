@@ -8,11 +8,12 @@ import {
     getPatientFromBlockchain,
     getDoctorFromBlockchain,
 } from '../BlockchainAccess.js';
+import Web3 from 'web3';
 
 class AddDoctor extends Component {
     async componentWillMount() {
-        await LoadWeb3();
-        this.state.blockchainData = await loadBlockchainData();
+        const web3 = new Web3('http://127.0.0.1:7545');
+        this.state.blockchainData = await loadBlockchainData(web3);
     }
     constructor(props) {
         super(props);
@@ -75,6 +76,7 @@ class AddDoctor extends Component {
                     name,
                     email,
                     password,
+                    this.state.blockchainData.web3,
                     this.state.blockchainData.networkData,
                     this.state.blockchainData.contract,
                     this.state.blockchainData.accounts,
