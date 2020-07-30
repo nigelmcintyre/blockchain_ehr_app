@@ -1,7 +1,6 @@
 var pkg = JavaImporter(org.openqa.selenium);
-var ui = JavaImporter(org.openqa.selenium.support.ui); //WebDrive
+var ui = JavaImporter(org.openqa.selenium.support.ui);
 var wait = new ui.WebDriverWait(WDS.browser, 30);
-// var expectedConditions = JavaImporter(org.openqa.selenium.support.ui.ExpectedConditions);
 
 WDS.sampleResult.sampleStart();
 WDS.sampleResult.getLatency();
@@ -42,19 +41,15 @@ doctor_key.sendKeys([
 ]);
 WDS.log.info('entered doctor key');
 
-WDS.browser.findElement(pkg.By.cssSelector("button.btn.btn-primary")).click();
+WDS.browser.findElement(pkg.By.cssSelector('button.btn.btn-primary')).click();
 
+new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(
+    org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent(),
+);
 
-// WDS.browser.wait.until(ui.ExpectedConditions.alertIsPresent());
-new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent())
-
-WDS.browser.switchTo().alert().accept();
-
-// var alertText = alert.getText()
-
-// WDS.browser.switchTo().alert();
-// alert.accept();
-
-
+WDS.browser
+    .switchTo()
+    .alert()
+    .accept();
 
 WDS.sampleResult.sampleEnd();

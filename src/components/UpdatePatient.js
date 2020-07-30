@@ -89,7 +89,7 @@ class UpdatePatient extends Component {
         const transactionObject = {
             nonce: nonce,
             from: this.state.blockchainData.accounts[0],
-            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            to: '0x40c3fF782eAeAaA12BA7873e83095689d9F8a06C',
             gas: '300000',
             data: encodedTx,
         };

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmeterTestPlan version="1.2" properties="5.0" jmeter="5.3">
   <hashTree>
-    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="AddPatient" enabled="true">
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="addDoctor" enabled="true">
       <stringProp name="TestPlan.comments"></stringProp>
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
@@ -12,29 +12,6 @@
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
     <hashTree>
-      <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config" enabled="true">
-        <stringProp name="WebDriverConfig.proxy_type">SYSTEM</stringProp>
-        <stringProp name="WebDriverConfig.proxy_pac_url"></stringProp>
-        <stringProp name="WebDriverConfig.http_host"></stringProp>
-        <intProp name="WebDriverConfig.http_port">8080</intProp>
-        <boolProp name="WebDriverConfig.use_http_for_all_protocols">true</boolProp>
-        <stringProp name="WebDriverConfig.https_host"></stringProp>
-        <intProp name="WebDriverConfig.https_port">8080</intProp>
-        <stringProp name="WebDriverConfig.ftp_host"></stringProp>
-        <intProp name="WebDriverConfig.ftp_port">8080</intProp>
-        <stringProp name="WebDriverConfig.socks_host"></stringProp>
-        <intProp name="WebDriverConfig.socks_port">8080</intProp>
-        <stringProp name="WebDriverConfig.no_proxy">localhost</stringProp>
-        <boolProp name="WebDriverConfig.maximize_browser">true</boolProp>
-        <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
-        <boolProp name="WebDriverConfig.dev_mode">false</boolProp>
-        <stringProp name="ChromeDriverConfig.chromedriver_path">/home/nigel/Downloads/chromedriver</stringProp>
-        <boolProp name="ChromeDriverConfig.android_enabled">false</boolProp>
-        <boolProp name="ChromeDriverConfig.headless_enabled">false</boolProp>
-        <boolProp name="ChromeDriverConfig.insecurecerts_enabled">false</boolProp>
-        <boolProp name="ChromeDriverConfig.incognito_enabled">false</boolProp>
-      </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
-      <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Thread Group" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
@@ -49,69 +26,53 @@
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
-        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="jp@gc - WebDriver Sampler" enabled="true">
+        <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="addDoctorSampler" enabled="true">
           <stringProp name="WebDriverSampler.script">var pkg = JavaImporter(org.openqa.selenium);
 var ui = JavaImporter(org.openqa.selenium.support.ui); //WebDrive
 var wait = new ui.WebDriverWait(WDS.browser, 30);
-// var expectedConditions = JavaImporter(org.openqa.selenium.support.ui.ExpectedConditions);
+
 
 WDS.sampleResult.sampleStart();
 WDS.sampleResult.getLatency();
 WDS.log.info(&apos;Sample started&apos;);
 
-WDS.browser.get(&apos;http://localhost:3000/addPatient&apos;);
-WDS.log.info(&apos;navigated to add patient page&apos;);
-
-var patient_address = WDS.browser.findElement(pkg.By.id(&apos;patientAddress&apos;));
-patient_address.click();
-patient_address.sendKeys([&apos;0xC02fb2BeE5A22b46712524fCAEF6e2c99815f201&apos;]);
-WDS.log.info(&apos;entered patient address&apos;);
-
-var patient_name = WDS.browser.findElement(pkg.By.id(&apos;patientName&apos;));
-patient_name.click();
-patient_name.sendKeys([&apos;Name&apos;]);
-WDS.log.info(&apos;entered patient name&apos;);
-
-var patient_email = WDS.browser.findElement(pkg.By.id(&apos;patientEmail&apos;));
-patient_email.click();
-patient_email.sendKeys([&apos;name@email&apos;]);
-WDS.log.info(&apos;entered patient email&apos;);
-
-var patient_password = WDS.browser.findElement(pkg.By.id(&apos;password&apos;));
-patient_password.click();
-patient_password.sendKeys([&apos;password&apos;]);
-WDS.log.info(&apos;entered patient password&apos;);
+WDS.browser.get(&apos;http://localhost:3000/addDoctor&apos;);
+WDS.log.info(&apos;navigated to add doctor page&apos;);
 
 var doctor_address = WDS.browser.findElement(pkg.By.id(&apos;doctorAddress&apos;));
 doctor_address.click();
-doctor_address.sendKeys([&apos;0x520E6Bb1238482C54F3eBdD9957d6fa8DdBE4e25&apos;]);
+doctor_address.sendKeys([WDS.args[0]]);
 WDS.log.info(&apos;entered doctor address&apos;);
 
-var doctor_key = WDS.browser.findElement(pkg.By.id(&apos;doctorKey&apos;));
-doctor_key.click();
-doctor_key.sendKeys([
-    &apos;38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0&apos;,
-]);
-WDS.log.info(&apos;entered doctor key&apos;);
+var doctor_name = WDS.browser.findElement(pkg.By.id(&apos;doctorName&apos;));
+doctor_name.click();
+doctor_name.sendKeys([WDS.args[1]]);
+WDS.log.info(&apos;entered doctor name&apos;);
 
-WDS.browser.findElement(pkg.By.cssSelector(&quot;button.btn.btn-primary&quot;)).click();
+var doctor_email = WDS.browser.findElement(pkg.By.id(&apos;doctorEmail&apos;));
+doctor_email.click();
+doctor_email.sendKeys([WDS.args[2]]);
+WDS.log.info(&apos;entered doctor email&apos;);
 
+WDS.browser.findElement(pkg.By.cssSelector(&apos;button.btn.btn-primary&apos;)).click();
 
 // WDS.browser.wait.until(ui.ExpectedConditions.alertIsPresent());
-new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent())
+new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(
+    org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
 
-WDS.browser.switchTo().alert().accept();
+WDS.browser
+    .switchTo()
+    .alert()
+    .accept();
 
 // var alertText = alert.getText()
 
 // WDS.browser.switchTo().alert();
 // alert.accept();
 
-
-
 WDS.sampleResult.sampleEnd();
 </stringProp>
-          <stringProp name="WebDriverSampler.parameters"></stringProp>
+          <stringProp name="WebDriverSampler.parameters">0x1133e6550f547Da0d57a8F1b74Af35aAaf45b40E Danial danial@mail.com</stringProp>
           <stringProp name="WebDriverSampler.language">javascript</stringProp>
         </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
         <hashTree>
@@ -154,6 +115,29 @@ WDS.sampleResult.sampleEnd();
           <hashTree/>
         </hashTree>
       </hashTree>
+      <com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig guiclass="com.googlecode.jmeter.plugins.webdriver.config.gui.ChromeDriverConfigGui" testclass="com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig" testname="jp@gc - Chrome Driver Config" enabled="true">
+        <stringProp name="WebDriverConfig.proxy_type">SYSTEM</stringProp>
+        <stringProp name="WebDriverConfig.proxy_pac_url"></stringProp>
+        <stringProp name="WebDriverConfig.http_host"></stringProp>
+        <intProp name="WebDriverConfig.http_port">8080</intProp>
+        <boolProp name="WebDriverConfig.use_http_for_all_protocols">true</boolProp>
+        <stringProp name="WebDriverConfig.https_host"></stringProp>
+        <intProp name="WebDriverConfig.https_port">8080</intProp>
+        <stringProp name="WebDriverConfig.ftp_host"></stringProp>
+        <intProp name="WebDriverConfig.ftp_port">8080</intProp>
+        <stringProp name="WebDriverConfig.socks_host"></stringProp>
+        <intProp name="WebDriverConfig.socks_port">8080</intProp>
+        <stringProp name="WebDriverConfig.no_proxy">localhost</stringProp>
+        <boolProp name="WebDriverConfig.maximize_browser">true</boolProp>
+        <boolProp name="WebDriverConfig.reset_per_iteration">false</boolProp>
+        <boolProp name="WebDriverConfig.dev_mode">false</boolProp>
+        <stringProp name="ChromeDriverConfig.chromedriver_path">/home/nigel/Downloads/chromedriver</stringProp>
+        <boolProp name="ChromeDriverConfig.android_enabled">false</boolProp>
+        <boolProp name="ChromeDriverConfig.headless_enabled">false</boolProp>
+        <boolProp name="ChromeDriverConfig.insecurecerts_enabled">false</boolProp>
+        <boolProp name="ChromeDriverConfig.incognito_enabled">false</boolProp>
+      </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
+      <hashTree/>
     </hashTree>
   </hashTree>
 </jmeterTestPlan>

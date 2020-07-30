@@ -57,7 +57,6 @@ contract Ehr is AccessControl{
         address addr;
         string name;
         string email;
-        string password;
     }
 
     mapping (address => PatientDetails) patients;
@@ -80,12 +79,10 @@ contract Ehr is AccessControl{
     function newDoctor(
         address _address,
         string calldata _name,
-        string calldata _email,
-        string calldata _password) external onlyAdmin {
+        string calldata _email) external onlyAdmin {
             doctors[_address] = DoctorDetails(_address,
                                             _name,
-                                            _email,
-                                            _password);
+                                            _email);
         grantRole(DEFAULT_ADMIN_ROLE, _address);
     }
     
@@ -103,12 +100,11 @@ contract Ehr is AccessControl{
 
     }
 
-    function getDoctor(address _address) public view onlyAdmin returns(address, string memory, string memory, string memory){
+    function getDoctor(address _address) public view onlyAdmin returns(address, string memory, string memory){
         if(doctors[_address].addr == _address){
           return (doctors[_address].addr,
                 doctors[_address].name,
-                doctors[_address].email,
-                doctors[_address].password);
+                doctors[_address].email);
         }
         revert('Doctor does not exist');
             

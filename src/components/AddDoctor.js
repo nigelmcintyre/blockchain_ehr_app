@@ -21,7 +21,6 @@ class AddDoctor extends Component {
             doctorAddress: '',
             doctorName: '',
             doctorEmail: '',
-            password: '',
             displayName: '',
 
             blockchainData: {},
@@ -33,7 +32,6 @@ class AddDoctor extends Component {
             doctorAddress: '',
             doctorName: '',
             doctorEmail: '',
-            password: '',
         });
     }
 
@@ -55,7 +53,6 @@ class AddDoctor extends Component {
                 this.state.blockchainData.contract,
                 this.state.blockchainData.accounts,
             );
-            console.log(isPatient);
 
             // Checking if address belongs to doctor account
             const isDoctor = await getDoctorFromBlockchain(
@@ -64,18 +61,15 @@ class AddDoctor extends Component {
                 this.state.blockchainData.contract,
                 this.state.blockchainData.accounts,
             );
-            console.log(isDoctor);
             if (!isPatient && !isDoctor) {
                 let address = this.state.doctorAddress;
                 let name = this.state.doctorName;
                 let email = this.state.doctorEmail;
-                let password = this.state.password;
                 this.clearInput();
                 await addDoctorToBlockchain(
                     address,
                     name,
                     email,
-                    password,
                     this.state.blockchainData.web3,
                     this.state.blockchainData.networkData,
                     this.state.blockchainData.contract,
@@ -134,18 +128,6 @@ class AddDoctor extends Component {
                                         value={this.state.doctorEmail}
                                     />
                                 </Form.Group>
-
-                                <Form.Group controlId="password">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        name="password"
-                                        onChange={this.handleInputChange}
-                                        placeholder="Password"
-                                        value={this.state.password}
-                                    />
-                                </Form.Group>
-
                                 <Button variant="primary" type="submit">
                                     Submit
                                 </Button>

@@ -1,6 +1,6 @@
 import Ehr from './abis/Ehr.json';
 import Tx from 'ethereumjs-tx';
-// Contract address: 0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f
+const contractAddress = '0x40c3fF782eAeAaA12BA7873e83095689d9F8a06C';
 
 export async function loadBlockchainData(web3) {
     const blockchainData = {
@@ -111,7 +111,7 @@ export async function addPatientToBlockchain(
         const transactionObject = {
             nonce: nonce,
             from: doctorAddress,
-            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            to: contractAddress,
             gas: '300000',
             data: encodedTx,
         };
@@ -146,7 +146,6 @@ export async function addDoctorToBlockchain(
     account,
     name,
     email,
-    password,
     web3,
     networkData,
     contract,
@@ -154,20 +153,19 @@ export async function addDoctorToBlockchain(
 ) {
     if (networkData) {
         const nonce = await web3.eth.getTransactionCount(accounts[0]);
-
+        console.log(nonce);
         // Contract method ABI
         const txBuilder = await contract.methods.newDoctor(
             account,
             name,
             email,
-            password,
         );
         const encodedTx = txBuilder.encodeABI();
 
         const transactionObject = {
             nonce: nonce,
             from: accounts[0],
-            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            to: contractAddress,
             gas: '300000',
             data: encodedTx,
         };
@@ -218,7 +216,7 @@ export async function deletePatient(
         const transactionObject = {
             nonce: nonce,
             from: accounts[0],
-            to: '0x93D1a2AA9432D678ea57ecEB9D911667CFF9462f',
+            to: contractAddress,
             gas: '300000',
             data: encodedTx,
         };
