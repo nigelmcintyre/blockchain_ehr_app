@@ -1,6 +1,6 @@
 import Ehr from './abis/Ehr.json';
 import Tx from 'ethereumjs-tx';
-const contractAddress = '0x40c3fF782eAeAaA12BA7873e83095689d9F8a06C';
+const contractAddress = '0x714E2f3DCf31358B8Ca3a59FE99FA4Ef09d74233';
 
 export async function loadBlockchainData(web3) {
     const blockchainData = {
@@ -20,6 +20,8 @@ export async function loadBlockchainData(web3) {
     // Getting the network where the contract is
     const networkData = Ehr.networks[networkId];
     blockchainData.networkData = networkData;
+
+    console.log(web3);
 
     if (networkData) {
         // Getting the account address of the current user
@@ -84,9 +86,6 @@ export async function getDoctorFromBlockchain(
 
 export async function addPatientToBlockchain(
     accountAddress,
-    name,
-    email,
-    password,
     hash,
     doctorAddress,
     doctorKey,
@@ -96,14 +95,16 @@ export async function addPatientToBlockchain(
 ) {
     if (networkData) {
         // Getting Tx nonce value of transaction sender
-        const nonce = await web3.eth.getTransactionCount(doctorAddress);
+        let nonce = 1;
+        try {
+            nonce = await web3.eth.getTransactionCount(doctorAddress);
+        } catch {
+            console.log('nonce undefined');
+        }
 
         // Contract method ABI
         const txBuilder = await contract.methods.newPatient(
             accountAddress,
-            name,
-            email,
-            password,
             hash,
         );
         const encodedTx = txBuilder.encodeABI();
@@ -124,7 +125,7 @@ export async function addPatientToBlockchain(
                 );
                 sentTx.on('confirmation', () => {
                     console.log(`Patient added to blockchain`);
-                    window.alert(`${name}'s record successfully created`);
+                    window.alert(`Patient's record successfully created`);
                 });
                 sentTx.on('error', (err) => {
                     console.log(err);

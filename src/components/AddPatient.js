@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
-import LoadWeb3 from '../loadWeb3';
 import Web3 from 'web3';
 import {
     loadBlockchainData,
@@ -13,7 +12,6 @@ import {
 
 class AddPatient extends Component {
     async componentWillMount() {
-        //await LoadWeb3();
         const web3 = new Web3('http://127.0.0.1:7545');
         this.state.blockchainData = await loadBlockchainData(web3);
     }
@@ -21,10 +19,16 @@ class AddPatient extends Component {
         super(props);
         this.state = {
             patientAddress: '',
-            patientName: '',
-            patientEmail: '',
-            password: '',
-            displayName: '',
+            age: '',
+            gender: '',
+            totalBilirubin: '',
+            directBilirubin: '',
+            alkalinePhosphotase: '',
+            alamineAminotransferase: '',
+            totalProteins: '',
+            albumin: '',
+            albuminGlobulinRatio: '',
+
             doctorAddress: '',
             doctorKey: '',
 
@@ -34,9 +38,18 @@ class AddPatient extends Component {
     clearInput() {
         this.setState({
             patientAddress: '',
-            patientName: '',
-            patientEmail: '',
-            password: '',
+            age: '',
+            gender: '',
+            totalBilirubin: '',
+            directBilirubin: '',
+            alkalinePhosphotase: '',
+            alamineAminotransferase: '',
+            totalProteins: '',
+            albumin: '',
+            albuminGlobulinRatio: '',
+
+            doctorAddress: '',
+            doctorKey: '',
         });
     }
 
@@ -73,17 +86,20 @@ class AddPatient extends Component {
             if (!isPatient && !isDoctor) {
                 console.log('submitting file to IPFS');
                 let address = this.state.patientAddress;
-                let name = this.state.patientName;
-                let email = this.state.patientEmail;
-                let password = this.state.password;
                 let doctorAddress = this.state.doctorAddress;
                 let doctorKey = this.state.doctorKey;
 
                 const data = JSON.stringify({
                     patientAddress: this.state.patientAddress,
-                    patientName: this.state.patientName,
-                    patientEmail: this.state.patientEmail,
-                    password: this.state.password,
+                    age: this.state.age,
+                    gender: this.state.gender,
+                    totalBilirubin: this.state.totalBilirubin,
+                    directBilirubin: this.state.directBilirubin,
+                    alkalinePhosphotase: this.state.alkalinePhosphotase,
+                    alamineAminotransferase: this.state.alamineAminotransferase,
+                    totalProteins: this.state.totalProteins,
+                    albumin: this.state.albumin,
+                    albuminGlobulinRatio: this.state.albuminGlobulinRatio,
                 });
                 // Adding patient record to IPFS
                 for await (file of ipfs.add(data)) {
@@ -95,9 +111,6 @@ class AddPatient extends Component {
                 console.log('Adding patient to blockchain');
                 await addPatientToBlockchain(
                     address,
-                    name,
-                    email,
-                    password,
                     patientHash,
                     doctorAddress,
                     doctorKey,
@@ -135,40 +148,104 @@ class AddPatient extends Component {
                                         value={this.state.patientAddress}
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="patientName">
-                                    <Form.Label>Patient Name</Form.Label>
+                                <Form.Group controlId="age">
+                                    <Form.Label>Patient Age</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        name="patientName"
-                                        //value={patientName}
+                                        name="age"
                                         onChange={this.handleInputChange}
-                                        placeholder="Enter patient's name"
-                                        value={this.state.patientName}
+                                        placeholder="Enter patient's age"
+                                        value={this.state.age}
                                     />
                                 </Form.Group>
 
-                                <Form.Group controlId="patientEmail">
+                                <Form.Group controlId="gender">
+                                    <Form.Label>Patient gender</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="gender"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patient's gender"
+                                        value={this.state.gender}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="totalBilirubin">
+                                    <Form.Label>Total Bilirubin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="totalBilirubin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total bilirubin"
+                                        value={this.state.totalBilirubin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="directBilirubin">
+                                    <Form.Label>Direct Bilirubin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="directBilirubin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients direct bilirubin"
+                                        value={this.state.directBilirubin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="alkalinePhosphotase">
                                     <Form.Label>
-                                        Patient email address
+                                        Alkaline Phosphotase
                                     </Form.Label>
                                     <Form.Control
-                                        type="email"
-                                        name="patientEmail"
-                                        //value={patientEmail}
+                                        type="text"
+                                        name="alkalinePhosphotase"
                                         onChange={this.handleInputChange}
-                                        placeholder="Enter patient's email"
-                                        value={this.state.patientEmail}
+                                        placeholder="Enter patients alkaline photophotase"
+                                        value={this.state.alkalinePhosphotase}
                                     />
                                 </Form.Group>
-
-                                <Form.Group controlId="password">
-                                    <Form.Label>Password</Form.Label>
+                                <Form.Group controlId="alamineAminotransferase">
+                                    <Form.Label>
+                                        Alamine Aminotransferase
+                                    </Form.Label>
                                     <Form.Control
-                                        type="password"
-                                        name="password"
+                                        type="text"
+                                        name="alamineAminotransferase"
                                         onChange={this.handleInputChange}
-                                        placeholder="Password"
-                                        value={this.state.password}
+                                        placeholder="Enter patients alamine aminotransferase"
+                                        value={
+                                            this.state.alamineAminotransferase
+                                        }
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="totalProteins">
+                                    <Form.Label>Total Proteins</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="totalProteins"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total proteins"
+                                        value={this.state.totalProteins}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="albumin">
+                                    <Form.Label>Albumin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="albumin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients albumin"
+                                        value={this.state.albumin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="albuminGlobulinRatio">
+                                    <Form.Label>
+                                        Albumin Globulin Ratio
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="albuminGlobulinRatio"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total albumin globulin ratio"
+                                        value={this.state.albuminGlobulinRatio}
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="doctorAddress">
@@ -197,7 +274,6 @@ class AddPatient extends Component {
                                     Submit
                                 </Button>
                             </Form>
-                            <p>{this.state.displayName}</p>
                         </div>
                     </main>
                 </div>

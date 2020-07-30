@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import LoadWeb3 from '../loadWeb3';
 import {
     loadBlockchainData,
     addDoctorToBlockchain,

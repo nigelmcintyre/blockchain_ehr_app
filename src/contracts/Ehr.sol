@@ -7,7 +7,7 @@ contract Ehr is AccessControl{
     address root = msg.sender;
 
     constructor () public {
-        _setupRole(DEFAULT_ADMIN_ROLE, root);    
+        _setupRole(DEFAULT_ADMIN_ROLE, root);
         _setRoleAdmin(PATIENT_ROLE, DEFAULT_ADMIN_ROLE);
        
     }
@@ -47,9 +47,6 @@ contract Ehr is AccessControl{
 
     struct PatientDetails {
         address addr;
-        string name;
-        string email;
-        string password;
         string patientHash;
     }
 
@@ -64,15 +61,9 @@ contract Ehr is AccessControl{
 
     function newPatient(
         address _address,
-        string calldata _name,
-        string calldata _email,
-        string calldata _password,
         string calldata _patientHash) external onlyAdmin {
         patients[_address] = PatientDetails(_address,
-                                            _name,
-                                            _email,
-                                            _password,
-                                            _patientHash); 
+                                            _patientHash);
         addPatientRole(_address);
     }
 
@@ -85,16 +76,12 @@ contract Ehr is AccessControl{
                                             _email);
         grantRole(DEFAULT_ADMIN_ROLE, _address);
     }
-    
 
-    function getPatient(address _address) public view onlyAdminPatient returns (address, string memory, string memory, string memory, string memory){
+    function getPatient(address _address) public view onlyAdminPatient returns (address, string memory){
       if(patients[_address].addr == msg.sender || isAdmin(msg.sender)){
         return (patients[_address].addr,
-                patients[_address].name,
-                patients[_address].email,
-                patients[_address].password,
                 patients[_address].patientHash);
-       } 
+       }
       revert('Patient does not exist or you do not have access to this record');
        
 
@@ -110,15 +97,8 @@ contract Ehr is AccessControl{
             
     }
 
-    function updatePatient(address _address, 
-                          string memory _name,
-                          string memory _email,
-                          string memory _password,
-                          string memory _patientHash) public onlyAdmin {
-      patients[_address].name = _name;
-      patients[_address].email = _email;
-      patients[_address].password = _password;
-      patients[_address].patientHash = _patientHash;
+    function updatePatient(address _address, string memory _patientHash) public onlyAdmin {
+          patients[_address].patientHash = _patientHash;
     }
 
     function destroyPatient(address _address) public onlyAdmin {

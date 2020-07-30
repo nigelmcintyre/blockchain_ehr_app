@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Table from 'react-bootstrap/Table';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import LoadWeb3 from '../loadWeb3';
 import { set_address, get_address } from '../actions';
 import { connect } from 'react-redux';
 import {
@@ -25,8 +24,15 @@ class ViewPatient extends Component {
             patientAddress: '',
             patient: '',
             retrievedAddress: '',
-            patientName: '',
-            patientEmail: '',
+            age: '',
+            gender: '',
+            totalBilirubin: '',
+            directBilirubin: '',
+            alkalinePhosphotase: '',
+            alamineAminotransferase: '',
+            totalProteins: '',
+            albumin: '',
+            albuminGlobulinRatio: '',
             isPatient: false,
             deletePatientAddress: '',
 
@@ -127,7 +133,7 @@ class ViewPatient extends Component {
             // Retrieving patient reccord from IPFS
             if (this.state.patient) {
                 const result = await fetch(
-                    `https://ipfs.infura.io/ipfs/${this.state.patient[4]}`,
+                    `https://ipfs.infura.io/ipfs/${this.state.patient[1]}`,
                 ).catch((error) => {
                     window.alert('Error retrieving patient reccord from IPFS');
                     console.log(error);
@@ -169,28 +175,86 @@ class ViewPatient extends Component {
                         Submit
                     </Button>
                     <Table className="my-3 py-md-3" striped bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Address</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                            </tr>
-                        </thead>
                         <tbody>
                             <tr>
+                                <td>Address</td>
                                 <td>
                                     {this.state.isPatient
                                         ? this.state.patient.patientAddress
                                         : ''}
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>Age</td>
                                 <td>
                                     {this.state.isPatient
-                                        ? this.state.patient.patientName
+                                        ? this.state.patient.age
                                         : ''}
                                 </td>
+                            </tr>
+                            <tr>
+                                <td>Gender</td>
                                 <td>
                                     {this.state.isPatient
-                                        ? this.state.patient.patientEmail
+                                        ? this.state.patient.gender
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Total Bilirubin</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.totalBilirubin
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Direct Bilirubin</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.directBilirubin
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Alkaline Phosphotase</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.alkalinePhosphotase
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Alamine Aminotransferase</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient
+                                              .alamineAminotransferase
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Total Proteins</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.totalProteins
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Albumin</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient.albumin
+                                        : ''}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Albumin Globulin Ratio</td>
+                                <td>
+                                    {this.state.isPatient
+                                        ? this.state.patient
+                                              .albuminGlobulinRatio
                                         : ''}
                                 </td>
                             </tr>

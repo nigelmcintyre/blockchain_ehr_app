@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { ipfs } from '../ipfsConfig';
-import LoadWeb3 from '../loadWeb3';
 import { get_address, set_address } from '../actions';
 import { connect } from 'react-redux';
 import store from '../index';
@@ -20,10 +19,18 @@ class UpdatePatient extends Component {
         super(props);
         this.state = {
             patient: '',
-            patientAddress: '',
-            patientName: '',
-            patientEmail: '',
-            displayName: '',
+            age: '',
+            gender: '',
+            totalBilirubin: '',
+            directBilirubin: '',
+            alkalinePhosphotase: '',
+            alamineAminotransferase: '',
+            totalProteins: '',
+            albumin: '',
+            albuminGlobulinRatio: '',
+
+            doctorAddress: '',
+            doctorKey: '',
 
             blockchainData: {},
         };
@@ -32,18 +39,33 @@ class UpdatePatient extends Component {
     async populateFields() {
         const patient = await store.getState();
         this.setState({
-            patientName: patient.patientAddressReducer.patientName,
-            patientEmail: patient.patientAddressReducer.patientEmail,
-            password: patient.patientAddressReducer.password,
+            age: patient.patientAddressReducer.age,
+            gender: patient.patientAddressReducer.gender,
+            totalBilirubin: patient.patientAddressReducer.totalBilirubin,
+            directBilirubin: patient.patientAddressReducer.directBilirubin,
+            alkalinePhosphotase:
+                patient.patientAddressReducer.alkalinePhosphotase,
+            alamineAminotransferase:
+                patient.patientAddressReducer.alamineAminotransferase,
+            totalProteins: patient.patientAddressReducer.totalProteins,
+            albumin: patient.patientAddressReducer.albumin,
+            albuminGlobulinRatio:
+                patient.patientAddressReducer.albuminGlobulinRatio,
         });
     }
 
     clearInput() {
         this.setState({
             patientAddress: '',
-            patientName: '',
-            patientEmail: '',
-            password: '',
+            age: '',
+            gender: '',
+            totalBilirubin: '',
+            directBilirubin: '',
+            alkalinePhosphotase: '',
+            alamineAminotransferase: '',
+            totalProteins: '',
+            albumin: '',
+            albuminGlobulinRatio: '',
         });
     }
     handleInputChange = (event) => {
@@ -62,9 +84,15 @@ class UpdatePatient extends Component {
         console.log('submitting file to IPFS');
         const data = JSON.stringify({
             patientAddress: this.props.patientAddress.patientAddress,
-            patientName: this.state.patientName,
-            patientEmail: this.state.patientEmail,
-            password: this.state.password,
+            age: this.state.age,
+            gender: this.state.gender,
+            totalBilirubin: this.state.totalBilirubin,
+            directBilirubin: this.state.directBilirubin,
+            alkalinePhosphotase: this.state.alkalinePhosphotase,
+            alamineAminotransferase: this.state.alamineAminotransferase,
+            totalProteins: this.state.totalProteins,
+            albumin: this.state.albumin,
+            albuminGlobulinRatio: this.state.albuminGlobulinRatio,
         });
         for await (file of ipfs.add(data)) {
             patientHash = file.path;
@@ -72,42 +100,39 @@ class UpdatePatient extends Component {
         }
 
         // Getting Tx nonce value of transaction sender
-        const nonce = await this.state.blockchainData.web3.eth.getTransactionCount(
-            this.state.blockchainData.accounts[0],
-        );
+        let nonce = 1;
+        try {
+            nonce = await this.state.blockchainData.web3.eth.getTransactionCount(
+                this.state.doctorAddress,
+            );
+        } catch {
+            console.log('nonce undefined');
+        }
 
         // Contract method ABI
-        const txBuilder = await this.state.blockchainData.contract.methods.newPatient(
+        const txBuilder = await this.state.blockchainData.contract.methods.updatePatient(
             this.props.patientAddress.patientAddress,
-            this.state.patientName,
-            this.state.patientEmail,
-            this.state.password,
             patientHash,
         );
         const encodedTx = txBuilder.encodeABI();
 
         const transactionObject = {
             nonce: nonce,
-            from: this.state.blockchainData.accounts[0],
-            to: '0x40c3fF782eAeAaA12BA7873e83095689d9F8a06C',
+            from: this.state.doctorAddress,
+            to: '0x714E2f3DCf31358B8Ca3a59FE99FA4Ef09d74233',
             gas: '300000',
             data: encodedTx,
         };
 
         this.state.blockchainData.web3.eth.accounts
-            .signTransaction(
-                transactionObject,
-                '38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0',
-            )
+            .signTransaction(transactionObject, this.state.doctorKey)
             .then((signedTx) => {
                 const sentTx = this.state.blockchainData.web3.eth.sendSignedTransaction(
                     signedTx.raw || signedTx.rawTransaction,
                 );
                 sentTx.on('confirmation', () => {
                     console.log(`Patient record updated on blockchain`);
-                    window.alert(
-                        `${this.state.patientName}'s record successfully updates`,
-                    );
+                    window.alert(`Record successfully updated`);
                     this.props.history.push('/viewPatient');
                 });
                 sentTx.on('error', (err) => {
@@ -141,27 +166,126 @@ class UpdatePatient extends Component {
                                         }
                                     </p>
                                 </Form.Group>
-
-                                <Form.Group controlId="patientName">
-                                    <Form.Label>Patient Name</Form.Label>
+                                <Form.Group controlId="age">
+                                    <Form.Label>Patient Age</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        name="patientName"
-                                        //value={patientName}
+                                        name="age"
                                         onChange={this.handleInputChange}
-                                        placeholder={this.state.patientName}
+                                        placeholder="Enter patient's age"
+                                        value={this.state.age}
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="patientEmail">
+
+                                <Form.Group controlId="gender">
+                                    <Form.Label>Patient gender</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="gender"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patient's gender"
+                                        value={this.state.gender}
+                                    />
+                                </Form.Group>
+
+                                <Form.Group controlId="totalBilirubin">
+                                    <Form.Label>Total Bilirubin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="totalBilirubin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total bilirubin"
+                                        value={this.state.totalBilirubin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="directBilirubin">
+                                    <Form.Label>Direct Bilirubin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="directBilirubin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients direct bilirubin"
+                                        value={this.state.directBilirubin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="alkalinePhosphotase">
                                     <Form.Label>
-                                        Patient email address
+                                        Alkaline Phosphotase
                                     </Form.Label>
                                     <Form.Control
-                                        type="email"
-                                        name="patientEmail"
-                                        //value={patientEmail}
+                                        type="text"
+                                        name="alkalinePhosphotase"
                                         onChange={this.handleInputChange}
-                                        placeholder={this.state.patientEmail}
+                                        placeholder="Enter patients alkaline photophotase"
+                                        value={this.state.alkalinePhosphotase}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="alamineAminotransferase">
+                                    <Form.Label>
+                                        Alamine Aminotransferase
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="alamineAminotransferase"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients alamine aminotransferase"
+                                        value={
+                                            this.state.alamineAminotransferase
+                                        }
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="totalProteins">
+                                    <Form.Label>Total Proteins</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="totalProteins"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total proteins"
+                                        value={this.state.totalProteins}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="albumin">
+                                    <Form.Label>Albumin</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="albumin"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients albumin"
+                                        value={this.state.albumin}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="albuminGlobulinRatio">
+                                    <Form.Label>
+                                        Albumin Globulin Ratio
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="albuminGlobulinRatio"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter patients total albumin globulin ratio"
+                                        value={this.state.albuminGlobulinRatio}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="doctorAddress">
+                                    <Form.Label>
+                                        Doctor Account Address
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="doctorAddress"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter doctor's account address"
+                                        value={this.state.doctorAddress}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="doctorKey">
+                                    <Form.Label>Doctor Private Key</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="doctorKey"
+                                        onChange={this.handleInputChange}
+                                        placeholder="Enter doctor's private key"
+                                        value={this.state.doctorKey}
                                     />
                                 </Form.Group>
 
