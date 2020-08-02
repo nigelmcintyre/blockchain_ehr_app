@@ -39,7 +39,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">1</stringProp>
+          <stringProp name="LoopController.loops">100</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -51,11 +51,8 @@
       <hashTree>
         <com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler guiclass="com.googlecode.jmeter.plugins.webdriver.sampler.gui.WebDriverSamplerGui" testclass="com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler" testname="addPatientSampler" enabled="true">
           <stringProp name="WebDriverSampler.script">var pkg = JavaImporter(org.openqa.selenium);
-var ui = JavaImporter(org.openqa.selenium.support.ui); //WebDrive
+var ui = JavaImporter(org.openqa.selenium.support.ui);
 var wait = new ui.WebDriverWait(WDS.browser, 30);
-var patientAddress = WDS.args[0];
-var doctorAddress = WDS.args[1];
-var doctorKey = WDS.args[2];
 
 WDS.sampleResult.sampleStart();
 WDS.sampleResult.getLatency();
@@ -66,66 +63,212 @@ WDS.log.info(&apos;navigated to add patient page&apos;);
 
 var patient_address = WDS.browser.findElement(pkg.By.id(&apos;patientAddress&apos;));
 patient_address.click();
-patient_address.sendKeys([patientAddress]);
+patient_address.sendKeys([WDS.args[0]]);
 WDS.log.info(&apos;entered patient address&apos;);
 
-var patient_name = WDS.browser.findElement(pkg.By.id(&apos;patientName&apos;));
-patient_name.click();
-patient_name.sendKeys([&apos;Name&apos;]);
-WDS.log.info(&apos;entered patient name&apos;);
+var patient_age = WDS.browser.findElement(pkg.By.id(&apos;age&apos;));
+patient_age.click();
+patient_age.sendKeys([WDS.args[1]]);
+WDS.log.info(&apos;entered patient age&apos;);
 
-var patient_email = WDS.browser.findElement(pkg.By.id(&apos;patientEmail&apos;));
-patient_email.click();
-patient_email.sendKeys([&apos;name@email&apos;]);
-WDS.log.info(&apos;entered patient email&apos;);
+var patient_gender = WDS.browser.findElement(pkg.By.id(&apos;gender&apos;));
+patient_gender.click();
+patient_gender.sendKeys([WDS.args[2]]);
+WDS.log.info(&apos;entered patient gender&apos;);
 
-var patient_password = WDS.browser.findElement(pkg.By.id(&apos;password&apos;));
-patient_password.click();
-patient_password.sendKeys([&apos;password&apos;]);
-WDS.log.info(&apos;entered patient password&apos;);
+var patient_totalBiliruben = WDS.browser.findElement(
+    pkg.By.id(&apos;totalBilirubin&apos;)
+);
+patient_totalBiliruben.click();
+patient_totalBiliruben.sendKeys([WDS.args[3]]);
+WDS.log.info(&apos;entered patient totalBilirubin&apos;);
+
+var patient_directBilirubin = WDS.browser.findElement(
+    pkg.By.id(&apos;directBilirubin&apos;)
+);
+patient_directBilirubin.click();
+patient_directBilirubin.sendKeys([WDS.args[4]]);
+WDS.log.info(&apos;entered patient directBilirubin&apos;);
+
+var patient_alkalinePhosphotase = WDS.browser.findElement(
+    pkg.By.id(&apos;alkalinePhosphotase&apos;)
+);
+patient_alkalinePhosphotase.click();
+patient_alkalinePhosphotase.sendKeys([WDS.args[5]]);
+WDS.log.info(&apos;entered patient alkalinePhosphotase&apos;);
+
+var patient_alamineAminotransferase = WDS.browser.findElement(
+    pkg.By.id(&apos;alamineAminotransferase&apos;)
+);
+patient_alamineAminotransferase.click();
+patient_alamineAminotransferase.sendKeys([WDS.args[6]]);
+WDS.log.info(&apos;entered patient alamineAminotransferase&apos;);
+
+var patient_totalProteins = WDS.browser.findElement(pkg.By.id(&apos;totalProteins&apos;));
+patient_totalProteins.click();
+patient_totalProteins.sendKeys([WDS.args[7]]);
+WDS.log.info(&apos;entered patient totalProteins&apos;);
+
+var patient_albumin = WDS.browser.findElement(pkg.By.id(&apos;albumin&apos;));
+patient_albumin.click();
+patient_albumin.sendKeys([WDS.args[8]]);
+WDS.log.info(&apos;entered patient albumin&apos;);
+
+var patient_albuminGlobulinRatio = WDS.browser.findElement(
+    pkg.By.id(&apos;albuminGlobulinRatio&apos;)
+);
+patient_albuminGlobulinRatio.click();
+patient_albuminGlobulinRatio.sendKeys([WDS.args[9]]);
+WDS.log.info(&apos;entered patient albuminGlobulinRatio&apos;);
 
 var doctor_address = WDS.browser.findElement(pkg.By.id(&apos;doctorAddress&apos;));
 doctor_address.click();
-doctor_address.sendKeys([doctorAddress]);
+doctor_address.sendKeys([WDS.args[10]]);
 WDS.log.info(&apos;entered doctor address&apos;);
 
 var doctor_key = WDS.browser.findElement(pkg.By.id(&apos;doctorKey&apos;));
 doctor_key.click();
-doctor_key.sendKeys([doctorKey]);
+doctor_key.sendKeys([WDS.args[11]]);
 WDS.log.info(&apos;entered doctor key&apos;);
 
-WDS.browser.findElement(pkg.By.cssSelector(&quot;button.btn.btn-primary&quot;)).click();
+WDS.browser.findElement(pkg.By.cssSelector(&apos;button.btn.btn-primary&apos;)).click();
 
+new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(
+    org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
 
-// WDS.browser.wait.until(ui.ExpectedConditions.alertIsPresent());
-new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent())
-
-WDS.browser.switchTo().alert().accept();
-
-// var alertText = alert.getText()
-
-// WDS.browser.switchTo().alert();
-// alert.accept();
-
-
+WDS.browser
+    .switchTo()
+    .alert()
+    .accept();
 
 WDS.sampleResult.sampleEnd();
 </stringProp>
-          <stringProp name="WebDriverSampler.parameters">${patientAddress} ${doctorAddress} ${doctorKey}</stringProp>
+          <stringProp name="WebDriverSampler.parameters">${patientAddress} ${age} ${gender} ${totalBilirubin} ${directBilirubin} ${alkalinePhosphotase} ${alamineAminotransferase} ${totalProteins} ${albumin} ${albuminGlobulinRatio} ${doctorAddress} ${doctorKey}</stringProp>
           <stringProp name="WebDriverSampler.language">javascript</stringProp>
         </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">addPatientSummRep</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="TableVisualizer" testclass="ResultCollector" testname="View Results in Table" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename">addPatientResTable</stringProp>
+        </ResultCollector>
         <hashTree/>
       </hashTree>
       <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
         <stringProp name="delimiter">,</stringProp>
         <stringProp name="fileEncoding">UTF-8</stringProp>
-        <stringProp name="filename">/home/nigel/blockchain_ehr_app/sampleAddress.csv</stringProp>
+        <stringProp name="filename">/home/nigel/blockchain_ehr_app/loadTest/test_data/indian_liver_patient_doctor_address.csv</stringProp>
         <boolProp name="ignoreFirstLine">false</boolProp>
         <boolProp name="quotedData">false</boolProp>
         <boolProp name="recycle">true</boolProp>
         <stringProp name="shareMode">shareMode.all</stringProp>
         <boolProp name="stopThread">false</boolProp>
-        <stringProp name="variableNames">patientAddress,doctorAddress,doctorKey</stringProp>
+        <stringProp name="variableNames">patientAddress,age,gender,totalBilirubin,directBilirubin,alkalinePhosphotase,alamineAminotransferase,totalProteins,albumin,albuminGlobulinRatio,doctorAddress,doctorKey</stringProp>
       </CSVDataSet>
       <hashTree/>
     </hashTree>
