@@ -1,6 +1,5 @@
 import Ehr from './abis/Ehr.json';
-import Tx from 'ethereumjs-tx';
-const contractAddress = '0x714E2f3DCf31358B8Ca3a59FE99FA4Ef09d74233';
+export const contractAddress = '0xCF23C0d60D280F449510f1f5D45Ee09783815c40';
 
 export async function loadBlockchainData(web3) {
     const blockchainData = {
@@ -20,8 +19,6 @@ export async function loadBlockchainData(web3) {
     // Getting the network where the contract is
     const networkData = Ehr.networks[networkId];
     blockchainData.networkData = networkData;
-
-    console.log(web3);
 
     if (networkData) {
         // Getting the account address of the current user
@@ -52,13 +49,16 @@ export async function getPatientFromBlockchain(
             .catch(() => {
                 console.log('Patient does not exist');
             });
-
-        if (patientBlockchainRecord[0].includes('0x0000')) {
-            // Patient does not exist return undefined
-            return undefined;
+        if (patientBlockchainRecord) {
+            if (patientBlockchainRecord[0].includes('0x0000')) {
+                // Patient does not exist return undefined
+                return undefined;
+            } else {
+                // Return patient if exists
+                return patientBlockchainRecord;
+            }
         } else {
-            // Return patient if exists
-            return patientBlockchainRecord;
+            return undefined;
         }
     } else {
         window.alert('Smart contract not deployed to detected network.');
@@ -117,12 +117,14 @@ export async function addPatientToBlockchain(
             data: encodedTx,
         };
 
-        web3.eth.accounts
+        await web3.eth.accounts
             .signTransaction(transactionObject, doctorKey)
             .then((signedTx) => {
                 const sentTx = web3.eth.sendSignedTransaction(
                     signedTx.raw || signedTx.rawTransaction,
                 );
+                console.log(signedTx);
+                console.log(sentTx);
                 sentTx.on('confirmation', () => {
                     console.log(`Patient added to blockchain`);
                     window.alert(`Patient's record successfully created`);
