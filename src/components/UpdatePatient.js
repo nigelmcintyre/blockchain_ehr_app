@@ -5,7 +5,7 @@ import { ipfs } from '../ipfsConfig';
 import { get_address, set_address } from '../actions';
 import { connect } from 'react-redux';
 import store from '../index';
-import { loadBlockchainData } from '../BlockchainAccess.js';
+import { loadBlockchainData, contractAddress } from '../BlockchainAccess.js';
 import Web3 from 'web3';
 
 class UpdatePatient extends Component {
@@ -109,17 +109,20 @@ class UpdatePatient extends Component {
             console.log('nonce undefined');
         }
 
+        console.log(
+            this.props.patientAddress.patientAddress + '\n' + patientHash,
+        );
         // Contract method ABI
         const txBuilder = await this.state.blockchainData.contract.methods.updatePatient(
             this.props.patientAddress.patientAddress,
             patientHash,
         );
         const encodedTx = txBuilder.encodeABI();
-
+        console.log(this.state.doctorAddress);
         const transactionObject = {
             nonce: nonce,
             from: this.state.doctorAddress,
-            to: '0x714E2f3DCf31358B8Ca3a59FE99FA4Ef09d74233',
+            to: contractAddress,
             gas: '300000',
             data: encodedTx,
         };
@@ -130,6 +133,7 @@ class UpdatePatient extends Component {
                 const sentTx = this.state.blockchainData.web3.eth.sendSignedTransaction(
                     signedTx.raw || signedTx.rawTransaction,
                 );
+                console.log(signedTx);
                 sentTx.on('confirmation', () => {
                     console.log(`Patient record updated on blockchain`);
                     window.alert(`Record successfully updated`);

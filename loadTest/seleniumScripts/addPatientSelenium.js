@@ -11,34 +11,72 @@ WDS.log.info('navigated to add patient page');
 
 var patient_address = WDS.browser.findElement(pkg.By.id('patientAddress'));
 patient_address.click();
-patient_address.sendKeys(['0xC02fb2BeE5A22b46712524fCAEF6e2c99815f201']);
+patient_address.sendKeys([WDS.args[0]]);
 WDS.log.info('entered patient address');
 
-var patient_name = WDS.browser.findElement(pkg.By.id('patientName'));
-patient_name.click();
-patient_name.sendKeys(['Name']);
-WDS.log.info('entered patient name');
+var patient_age = WDS.browser.findElement(pkg.By.id('age'));
+patient_age.click();
+patient_age.sendKeys([WDS.args[1]]);
+WDS.log.info('entered patient age');
 
-var patient_email = WDS.browser.findElement(pkg.By.id('patientEmail'));
-patient_email.click();
-patient_email.sendKeys(['name@email']);
-WDS.log.info('entered patient email');
+var patient_gender = WDS.browser.findElement(pkg.By.id('gender'));
+patient_gender.click();
+patient_gender.sendKeys([WDS.args[2]]);
+WDS.log.info('entered patient gender');
 
-var patient_password = WDS.browser.findElement(pkg.By.id('password'));
-patient_password.click();
-patient_password.sendKeys(['password']);
-WDS.log.info('entered patient password');
+var patient_totalBiliruben = WDS.browser.findElement(
+    pkg.By.id('totalBilirubin'),
+);
+patient_totalBiliruben.click();
+patient_totalBiliruben.sendKeys([WDS.args[3]]);
+WDS.log.info('entered patient totalBilirubin');
+
+var patient_directBilirubin = WDS.browser.findElement(
+    pkg.By.id('directBilirubin'),
+);
+patient_directBilirubin.click();
+patient_directBilirubin.sendKeys([WDS.args[4]]);
+WDS.log.info('entered patient directBilirubin');
+
+var patient_alkalinePhosphotase = WDS.browser.findElement(
+    pkg.By.id('alkalinePhosphotase'),
+);
+patient_alkalinePhosphotase.click();
+patient_alkalinePhosphotase.sendKeys([WDS.args[5]]);
+WDS.log.info('entered patient alkalinePhosphotase');
+
+var patient_alamineAminotransferase = WDS.browser.findElement(
+    pkg.By.id('alamineAminotransferase'),
+);
+patient_alamineAminotransferase.click();
+patient_alamineAminotransferase.sendKeys([WDS.args[6]]);
+WDS.log.info('entered patient alamineAminotransferase');
+
+var patient_totalProteins = WDS.browser.findElement(pkg.By.id('totalProteins'));
+patient_totalProteins.click();
+patient_totalProteins.sendKeys([WDS.args[7]]);
+WDS.log.info('entered patient totalProteins');
+
+var patient_albumin = WDS.browser.findElement(pkg.By.id('albumin'));
+patient_albumin.click();
+patient_albumin.sendKeys([WDS.args[8]]);
+WDS.log.info('entered patient albumin');
+
+var patient_albuminGlobulinRatio = WDS.browser.findElement(
+    pkg.By.id('albuminGlobulinRatio'),
+);
+patient_albuminGlobulinRatio.click();
+patient_albuminGlobulinRatio.sendKeys([WDS.args[9]]);
+WDS.log.info('entered patient albuminGlobulinRatio');
 
 var doctor_address = WDS.browser.findElement(pkg.By.id('doctorAddress'));
 doctor_address.click();
-doctor_address.sendKeys(['0x520E6Bb1238482C54F3eBdD9957d6fa8DdBE4e25']);
+doctor_address.sendKeys([WDS.args[10]]);
 WDS.log.info('entered doctor address');
 
 var doctor_key = WDS.browser.findElement(pkg.By.id('doctorKey'));
 doctor_key.click();
-doctor_key.sendKeys([
-    '38134c48d5fcaf5f71777a054013d4d3579f78f6f2d3f48b7fbb539317ecada0',
-]);
+doctor_key.sendKeys([WDS.args[11]]);
 WDS.log.info('entered doctor key');
 
 WDS.browser.findElement(pkg.By.cssSelector('button.btn.btn-primary')).click();
