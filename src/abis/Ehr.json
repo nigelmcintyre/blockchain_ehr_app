@@ -8223,12 +8223,12 @@
         }
       },
       "links": {},
-      "address": "0xaf7EeBF933cfF222608E20a9a05cb57c7fe93C1E",
-      "transactionHash": "0xcc8d41f17cf130124f814e6a507139ad382635a0e39299816e2fa81d269c1e71"
+      "address": "0x4Aa1cC940d190F7E2015CeBb6490B5475DC19421",
+      "transactionHash": "0xbc67d385d3ac5999b68f42e6745d04cdf94cc08a7c70e9447b4b1177a81508dd"
     }
   },
-  "schemaVersion": "3.2.0",
-  "updatedAt": "2020-08-02T16:24:56.227Z",
+  "schemaVersion": "3.2.3",
+  "updatedAt": "2020-08-11T17:28:47.187Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {

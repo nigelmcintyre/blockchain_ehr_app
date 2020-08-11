@@ -214,6 +214,7 @@ WDS.sampleResult.sampleEnd();
         <boolProp name="ChromeDriverConfig.headless_enabled">false</boolProp>
         <boolProp name="ChromeDriverConfig.insecurecerts_enabled">false</boolProp>
         <boolProp name="ChromeDriverConfig.incognito_enabled">false</boolProp>
+        <boolProp name="ChromeDriverConfig.no_sandbox_enabled">false</boolProp>
       </com.googlecode.jmeter.plugins.webdriver.config.ChromeDriverConfig>
       <hashTree/>
     </hashTree>
