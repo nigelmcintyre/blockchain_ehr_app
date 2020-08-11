@@ -29,6 +29,7 @@ export async function loadBlockchainData(web3) {
 
         // Getting the contract instance
         const contract = await web3.eth.Contract(Ehr.abi, networkData.address);
+        console.log(contract);
         blockchainData.contract = contract;
 
         return blockchainData;
