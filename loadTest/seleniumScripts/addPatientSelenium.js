@@ -39,14 +39,14 @@ patient_directBilirubin.sendKeys([WDS.args[4]]);
 WDS.log.info('entered patient directBilirubin');
 
 var patient_alkalinePhosphotase = WDS.browser.findElement(
-    pkg.By.id('alkalinePhosphotase'),
+    pkg.By.id('alkalinePhosphotase')
 );
 patient_alkalinePhosphotase.click();
 patient_alkalinePhosphotase.sendKeys([WDS.args[5]]);
 WDS.log.info('entered patient alkalinePhosphotase');
 
 var patient_alamineAminotransferase = WDS.browser.findElement(
-    pkg.By.id('alamineAminotransferase'),
+    pkg.By.id('alamineAminotransferase')
 );
 patient_alamineAminotransferase.click();
 patient_alamineAminotransferase.sendKeys([WDS.args[6]]);
@@ -63,7 +63,7 @@ patient_albumin.sendKeys([WDS.args[8]]);
 WDS.log.info('entered patient albumin');
 
 var patient_albuminGlobulinRatio = WDS.browser.findElement(
-    pkg.By.id('albuminGlobulinRatio'),
+    pkg.By.id('albuminGlobulinRatio')
 );
 patient_albuminGlobulinRatio.click();
 patient_albuminGlobulinRatio.sendKeys([WDS.args[9]]);
@@ -91,3 +91,5 @@ WDS.browser
     .accept();
 
 WDS.sampleResult.sampleEnd();
+
+${patientAddress} ${age} ${gender ${totalBilirubin} ${directBilirubin} ${alkalinePhosphotase} ${alamineAminotransferase} ${totalProteins} ${albumin} ${albuminGlobulinRatio} ${doctorAddress} ${doctorKey}

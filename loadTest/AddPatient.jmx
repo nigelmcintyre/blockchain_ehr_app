@@ -67,21 +67,76 @@ patient_address.click();
 patient_address.sendKeys([WDS.args[0]]);
 WDS.log.info(&apos;entered patient address&apos;);
 
+var patient_age = WDS.browser.findElement(pkg.By.id(&apos;age&apos;));
+patient_age.click();
+patient_age.sendKeys([WDS.args[1]]);
+WDS.log.info(&apos;entered patient age&apos;);
+
+var patient_gender = WDS.browser.findElement(pkg.By.id(&apos;gender&apos;));
+patient_gender.click();
+patient_gender.sendKeys([WDS.args[2]]);
+WDS.log.info(&apos;entered patient gender&apos;);
+
+var patient_totalBiliruben = WDS.browser.findElement(
+    pkg.By.id(&apos;totalBilirubin&apos;)
+);
+patient_totalBiliruben.click();
+patient_totalBiliruben.sendKeys([WDS.args[3]]);
+WDS.log.info(&apos;entered patient totalBilirubin&apos;);
+
+var patient_directBilirubin = WDS.browser.findElement(
+    pkg.By.id(&apos;directBilirubin&apos;)
+);
+patient_directBilirubin.click();
+patient_directBilirubin.sendKeys([WDS.args[4]]);
+WDS.log.info(&apos;entered patient directBilirubin&apos;);
+
+var patient_alkalinePhosphotase = WDS.browser.findElement(
+    pkg.By.id(&apos;alkalinePhosphotase&apos;)
+);
+patient_alkalinePhosphotase.click();
+patient_alkalinePhosphotase.sendKeys([WDS.args[5]]);
+WDS.log.info(&apos;entered patient alkalinePhosphotase&apos;);
+
+var patient_alamineAminotransferase = WDS.browser.findElement(
+    pkg.By.id(&apos;alamineAminotransferase&apos;)
+);
+patient_alamineAminotransferase.click();
+patient_alamineAminotransferase.sendKeys([WDS.args[6]]);
+WDS.log.info(&apos;entered patient alamineAminotransferase&apos;);
+
+var patient_totalProteins = WDS.browser.findElement(pkg.By.id(&apos;totalProteins&apos;));
+patient_totalProteins.click();
+patient_totalProteins.sendKeys([WDS.args[7]]);
+WDS.log.info(&apos;entered patient totalProteins&apos;);
+
+var patient_albumin = WDS.browser.findElement(pkg.By.id(&apos;albumin&apos;));
+patient_albumin.click();
+patient_albumin.sendKeys([WDS.args[8]]);
+WDS.log.info(&apos;entered patient albumin&apos;);
+
+var patient_albuminGlobulinRatio = WDS.browser.findElement(
+    pkg.By.id(&apos;albuminGlobulinRatio&apos;)
+);
+patient_albuminGlobulinRatio.click();
+patient_albuminGlobulinRatio.sendKeys([WDS.args[9]]);
+WDS.log.info(&apos;entered patient albuminGlobulinRatio&apos;);
 
 var doctor_address = WDS.browser.findElement(pkg.By.id(&apos;doctorAddress&apos;));
 doctor_address.click();
-doctor_address.sendKeys([WDS.args[1]]);
+doctor_address.sendKeys([WDS.args[10]]);
 WDS.log.info(&apos;entered doctor address&apos;);
 
 var doctor_key = WDS.browser.findElement(pkg.By.id(&apos;doctorKey&apos;));
 doctor_key.click();
-doctor_key.sendKeys([WDS.args[2]]);
+doctor_key.sendKeys([WDS.args[11]]);
 WDS.log.info(&apos;entered doctor key&apos;);
 
 WDS.browser.findElement(pkg.By.cssSelector(&apos;button.btn.btn-primary&apos;)).click();
 
 new org.openqa.selenium.support.ui.WebDriverWait(WDS.browser, 30000).until(
-    org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent());
+    org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent()
+);
 
 WDS.browser
     .switchTo()
@@ -90,7 +145,7 @@ WDS.browser
 
 WDS.sampleResult.sampleEnd();
 </stringProp>
-          <stringProp name="WebDriverSampler.parameters">${patientAddress} ${doctorAddress} ${doctorKey}</stringProp>
+          <stringProp name="WebDriverSampler.parameters">${patientAddress} ${age} ${gender} ${totalBilirubin} ${directBilirubin} ${alkalinePhosphotase} ${alamineAminotransferase} ${totalProteins} ${albumin} ${albuminGlobulinRatio} ${doctorAddress} ${doctorKey}</stringProp>
           <stringProp name="WebDriverSampler.language">javascript</stringProp>
         </com.googlecode.jmeter.plugins.webdriver.sampler.WebDriverSampler>
         <hashTree/>
@@ -165,7 +220,7 @@ WDS.sampleResult.sampleEnd();
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename"></stringProp>
+          <stringProp name="filename">addPatientResTable_2</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
@@ -178,7 +233,7 @@ WDS.sampleResult.sampleEnd();
         <boolProp name="recycle">true</boolProp>
         <stringProp name="shareMode">shareMode.all</stringProp>
         <boolProp name="stopThread">false</boolProp>
-        <stringProp name="variableNames">patientAddress,doctorAddress,doctorKey</stringProp>
+        <stringProp name="variableNames">patientAddress,age,gender,totalBilirubin,directBilirubin,alkalinePhosphotase,alamineAminotransferase,totalProteins,albumin,albuminGlobulinRatio,doctorAddress,doctorKey</stringProp>
       </CSVDataSet>
       <hashTree/>
     </hashTree>
