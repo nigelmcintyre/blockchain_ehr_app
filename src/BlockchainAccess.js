@@ -1,5 +1,5 @@
 import Ehr from './abis/Ehr.json';
-export const contractAddress = '0x9046F6D40ACCa1668Ac3047275a31252A6D1B711';
+export const contractAddress = '0x8dC5C2F8DbB0f7A5Cf7a1773c822a7a9C8A64ac2';
 
 export async function loadBlockchainData(web3) {
     const blockchainData = {

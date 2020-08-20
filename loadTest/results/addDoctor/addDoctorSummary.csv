@@ -1,3 +1,0 @@
-Label,# Samples,Average,Min,Max,Std. Dev.,Error %,Throughput,Received KB/sec,Sent KB/sec,Avg. Bytes
-jp@gc - WebDriver Sampler,10,5067,4594,7517,844.87,0.000%,.18905,34.24,0.00,185449.0
-TOTAL,10,5067,4594,7517,844.87,0.000%,.18905,34.24,0.00,185449.0

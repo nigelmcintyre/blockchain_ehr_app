@@ -220,7 +220,7 @@ WDS.sampleResult.sampleEnd();
               <connectTime>true</connectTime>
             </value>
           </objProp>
-          <stringProp name="filename">addPatientResTable_2</stringProp>
+          <stringProp name="filename">addPatientResTable_4</stringProp>
         </ResultCollector>
         <hashTree/>
       </hashTree>
